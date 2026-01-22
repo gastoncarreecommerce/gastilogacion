@@ -138,9 +138,10 @@ input[type="color"]{
 canvas{
   width:min(520px, 100%);
   height:auto;
-  border-radius:14px;
+  border-radius:0; /* IMPORTANT: preview igual al export */
   border:1px solid var(--line);
   background:#fff;
+  display:block;
 }
 
 .hint{margin:8px 0 0; color:var(--muted); font-size:12px; line-height:1.4}
