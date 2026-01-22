@@ -1,8 +1,9 @@
-// Hero Builder — Live preview + robust render
+// Hero Builder — Live preview + centered layout + 2-line title
 // - Fondo: imagen subida (cover)
-// - Header: icono animal + título Ubuntu
-// - Footer: barra azul con íconos cocción + bloque peso
-// - Render automático en vivo
+// - Header: icono animal + título Ubuntu (centrado, 2 líneas)
+// - Footer: barra azul con íconos cocción centrados (1/2/3) + bloque peso
+// - Sin separadores entre cocciones
+// - Export: PNG
 
 const el = (id) => document.getElementById(id);
 
@@ -16,6 +17,7 @@ const weightText = el("weightText");
 const sizeSelect = el("sizeSelect");
 const brandBlue = el("brandBlue");
 const safeMargin = el("safeMargin");
+const showWeightDivider = el("showWeightDivider");
 
 const btnRender = el("btnRender");
 const btnDownload = el("btnDownload");
@@ -35,6 +37,8 @@ function svgToImage(svgString) {
   });
 }
 
+// Animal icons (tile) – placeholder style.
+// If you have official SVGs, I can swap them in 1:1.
 const ICONS = {
   cow: `
 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
@@ -189,6 +193,55 @@ function drawCover(img, x, y, w, h) {
   ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
 
+// 2-line wrap with ellipsis
+function wrapLines(ctx, text, maxWidth, maxLines = 2) {
+  const words = (text || "").trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [""];
+
+  const lines = [];
+  let line = "";
+  let consumedWords = 0;
+
+  for (let i = 0; i < words.length; i++) {
+    const test = line ? `${line} ${words[i]}` : words[i];
+    const w = ctx.measureText(test).width;
+
+    if (w <= maxWidth) {
+      line = test;
+      consumedWords = i + 1;
+      continue;
+    }
+
+    if (line) {
+      lines.push(line);
+      line = words[i];
+    } else {
+      // single word too long: hard cut
+      line = words[i];
+      lines.push(line);
+      consumedWords = i + 1;
+    }
+
+    if (lines.length === maxLines - 1) break;
+  }
+
+  if (lines.length < maxLines && line) {
+    lines.push(line);
+  }
+
+  const hasMore = consumedWords < words.length;
+  if (hasMore && lines.length) {
+    let last = lines[lines.length - 1];
+    const ell = "…";
+    while (ctx.measureText(last + ell).width > maxWidth && last.length > 1) {
+      last = last.slice(0, -1);
+    }
+    lines[lines.length - 1] = last + ell;
+  }
+
+  return lines.slice(0, maxLines);
+}
+
 function getSelectedCooks() {
   return Array.from(document.querySelectorAll(".cook"))
     .filter(cb => cb.checked)
@@ -235,7 +288,6 @@ async function render() {
     canvas.width = size;
     canvas.height = size;
 
-    // Load font (safe)
     if (document.fonts?.load) {
       await document.fonts.load(`700 ${Math.round(size * 0.08)}px Ubuntu`);
     }
@@ -255,24 +307,44 @@ async function render() {
 
     const margin = Number(safeMargin.value);
 
-    // Header
-    const headerY = margin;
+    // ---------- HEADER ----------
     const tileSize = Math.round(size * 0.16);
     const gap = Math.round(size * 0.03);
+    const headerY = margin;
 
+    // animal tile
     const aImg = animalImgs[animalSelect.value];
     if (aImg) ctx.drawImage(aImg, margin, headerY, tileSize, tileSize);
 
+    // title: centered (in remaining area), 2 lines
     const title = (titleText.value || "").trim() || "Título";
+    const fontSize = Math.round(size * 0.075);
+    const lineH = Math.round(fontSize * 1.1);
+
     ctx.fillStyle = blue;
-    ctx.font = `700 ${Math.round(size * 0.085)}px Ubuntu, sans-serif`;
+    ctx.font = `700 ${fontSize}px Ubuntu, sans-serif`;
+
+    const titleAreaX = margin + tileSize + gap;
+    const titleAreaW = size - margin - titleAreaX;
+
+    const lines = wrapLines(ctx, title, titleAreaW, 2);
+
+    ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
 
-    const titleX = margin + tileSize + gap;
-    const titleY = headerY + Math.round(tileSize * 0.64);
-    ctx.fillText(title, titleX, titleY);
+    const centerX = titleAreaX + titleAreaW / 2;
+    const totalTextH = lines.length * lineH;
+    const firstBaselineY = headerY + Math.round((tileSize - totalTextH) / 2) + lineH;
 
-    // Footer
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], centerX, firstBaselineY + i * lineH);
+    }
+
+    // reset align
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
+
+    // ---------- FOOTER ----------
     const footerH = Math.round(size * 0.25);
     const footerY = size - footerH;
 
@@ -282,39 +354,37 @@ async function render() {
     const weightBlockW = Math.round(size * 0.28);
     const leftW = size - weightBlockW;
 
-    // divider weight
-    ctx.strokeStyle = "rgba(255,255,255,0.25)";
-    ctx.lineWidth = Math.max(2, Math.round(size * 0.004));
-    ctx.beginPath();
-    ctx.moveTo(leftW, footerY);
-    ctx.lineTo(leftW, size);
-    ctx.stroke();
-
-    // 3 slots like example
-    const slots = 3;
-    const slotW = leftW / slots;
-
-    // slot dividers
-    for (let i = 1; i < slots; i++) {
+    // optional divider before weight
+    if (showWeightDivider.checked) {
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = Math.max(2, Math.round(size * 0.004));
       ctx.beginPath();
-      ctx.moveTo(Math.round(slotW * i), footerY);
-      ctx.lineTo(Math.round(slotW * i), size);
+      ctx.moveTo(leftW, footerY);
+      ctx.lineTo(leftW, size);
       ctx.stroke();
     }
 
-    // cook icons
+    // cook icons centered as a group (NO slot dividers)
     const cooks = getSelectedCooks();
     const iconSize = Math.round(size * 0.12);
     const iconY = footerY + Math.round((footerH - iconSize) / 2);
 
-    for (let i = 0; i < cooks.length; i++) {
-      const img = cookImgs[cooks[i]];
-      if (!img) continue;
-      const cx = Math.round(slotW * i + (slotW - iconSize) / 2);
-      ctx.drawImage(img, cx, iconY, iconSize, iconSize);
+    const gapIcons = Math.round(iconSize * 0.55);
+    const count = cooks.length;
+
+    if (count > 0) {
+      const totalW = count * iconSize + (count - 1) * gapIcons;
+      const startX = Math.round((leftW - totalW) / 2);
+
+      for (let i = 0; i < count; i++) {
+        const img = cookImgs[cooks[i]];
+        if (!img) continue;
+        const x = startX + i * (iconSize + gapIcons);
+        ctx.drawImage(img, x, iconY, iconSize, iconSize);
+      }
     }
 
-    // weight text
+    // weight text centered
     const wText = (weightText.value || "x kg").trim();
     ctx.fillStyle = "#fff";
     ctx.font = `700 ${Math.round(size * 0.085)}px Ubuntu, sans-serif`;
@@ -334,7 +404,7 @@ async function render() {
   }
 }
 
-// --- Live preview (debounced to animation frame) ---
+// --- Live preview (debounced) ---
 function scheduleRender() {
   if (scheduled) return;
   scheduled = true;
@@ -362,15 +432,15 @@ btnDownload.addEventListener("click", () => {
 });
 
 // Live inputs
-[titleText, animalSelect, weightText, sizeSelect, brandBlue, safeMargin].forEach((node) => {
+[titleText, animalSelect, weightText, sizeSelect, brandBlue, safeMargin, showWeightDivider].forEach((node) => {
   node.addEventListener("input", scheduleRender);
   node.addEventListener("change", scheduleRender);
 });
 
-// checkboxes cook
+// cook checkboxes
 document.querySelectorAll(".cook").forEach(cb => {
   cb.addEventListener("change", scheduleRender);
 });
 
-// First paint
+// first render
 render();
