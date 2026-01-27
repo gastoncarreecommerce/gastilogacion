@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Carrefour PRO - 1000x1000</title>
+    <title>Generador Carrefour MASTER HD</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,227 +15,212 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
-        :root { --azul: #0B3A8F; }
+        /* --- ESTILOS GENERALES DE LA INTERFAZ --- */
+        :root { --azul-carrefour: #0B3A8F; }
+        
         body { 
             font-family: 'Ubuntu', sans-serif; 
-            background: #1a1a1a; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+            background: #121212; /* Fondo oscuro pro */
+            margin: 0; padding: 40px; 
+            display: flex; flex-direction: column; align-items: center; 
             color: white; 
         }
         
-        /* PANEL DE CONTROL */
-        .controls { 
-            background: #2d2d2d; 
-            padding: 30px; 
-            border-radius: 12px; 
-            width: 100%; 
-            max-width: 600px; 
-            border: 1px solid #444; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .panel-control { 
+            background: #252525; padding: 40px; border-radius: 16px; 
+            width: 100%; max-width: 700px; border: 1px solid #333; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-        h2 { margin-top: 0; color: #fff; border-bottom: 2px solid var(--azul); padding-bottom: 15px; }
-        label { display: block; font-weight: bold; margin: 20px 0 8px; color: #ccc; }
+        
+        h1 { margin: 0 0 20px 0; border-bottom: 3px solid var(--azul-carrefour); padding-bottom: 15px; font-size: 24px;}
+        p { color: #aaa; margin-bottom: 30px; line-height: 1.5; }
+        
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 10px; color: #fff; letter-spacing: 0.5px; }
         
         input[type="file"] { 
-            background: #111; 
-            padding: 15px; 
-            width: 100%; 
-            border: 1px solid #555; 
-            border-radius: 6px; 
-            color: #fff;
-            box-sizing: border-box;
+            background: #111; padding: 20px; width: 100%; 
+            border: 2px dashed #555; border-radius: 8px; color: #fff; box-sizing: border-box;
+            transition: border-color 0.3s;
         }
-        
-        .log-area { 
-            background: #000; 
-            color: #00ff00; 
-            font-family: 'Consolas', monospace; 
-            padding: 15px; 
-            height: 200px; 
-            overflow-y: auto; 
-            margin-top: 25px; 
-            border-radius: 6px; 
-            font-size: 13px;
-            border: 1px solid #333;
+        input[type="file"]:hover { border-color: var(--azul-carrefour); }
+
+        .btn-download {
+            background: var(--azul-carrefour); color: white; font-size: 20px; width: 100%; 
+            padding: 20px; border: none; border-radius: 10px; cursor: pointer; 
+            margin-top: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+        .btn-download:hover { background: #154bb5; transform: translateY(-2px); }
+        .btn-download:disabled { background: #444; opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .console-log { 
+            background: #000; color: #00ff00; font-family: 'Consolas', monospace; 
+            padding: 20px; height: 250px; overflow-y: auto; margin-top: 30px; 
+            border-radius: 8px; font-size: 13px; border: 1px solid #333;
         }
 
-        .btn-action {
-            background: var(--azul); 
-            color: white; 
-            font-size: 18px; 
-            width: 100%; 
-            padding: 18px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            margin-top: 30px; 
-            font-weight: bold;
-            transition: background 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .btn-action:hover { background: #154bb5; }
-        .btn-action:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
-
-        /* -----------------------------------------------------------
-           LA FÁBRICA FANTASMA (Shadow Factory)
-           Este contenedor está fuera de la vista pero tiene dimensiones REALES.
-           No usamos 'display: none' porque html2canvas no lo vería.
-           Usamos coordenadas negativas extremas.
-        ----------------------------------------------------------- */
+        /* --- FÁBRICA FANTASMA (SHADOW FACTORY) --- */
+        /* Aquí ocurre la magia. Dimensiones 1000x1000 REALES fuera de pantalla */
         #shadow-factory {
-            position: fixed;
-            top: 0;
-            left: -10000px; /* Lejos de la pantalla */
-            width: 1000px;
+            position: fixed; 
+            top: 0; 
+            left: -10000px; /* Muy lejos de la pantalla */
+            width: 1000px; 
             height: 1000px;
-            /* IMPORTANTE: Fondo blanco base para evitar transparencias raras */
             background-color: #ffffff; 
-            z-index: -1;
+            z-index: -9999;
         }
 
-        /* LIENZO DE RENDERIZADO (1000x1000 PURO) */
+        /* LIENZO DE RENDERIZADO HD */
         .canvas-container {
-            position: relative;
-            width: 1000px;
-            height: 1000px;
+            position: relative; 
+            width: 1000px; 
+            height: 1000px; 
             overflow: hidden;
-            /* Renderizado de texto optimizado */
+            /* Optimizaciones de renderizado de texto */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: geometricPrecision;
         }
 
-        /* CAPA 1: FONDO (Imagen Producto) */
-        .bg-image {
-            position: absolute;
-            top: 0; left: 0;
-            width: 1000px;
-            height: 1000px;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+        /* CAPA 1: FONDO DINÁMICO */
+        .bg-layer {
+            position: absolute; top: 0; left: 0; width: 1000px; height: 1000px;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
             z-index: 1;
         }
 
-        /* CAPAS GENÉRICAS */
-        .layer { position: absolute; pointer-events: none; }
-
-        /* CAPA 2: FOOTER (Base Azul) */
+        /* CAPAS GRÁFICAS (PNGs) */
+        .layer-png { position: absolute; pointer-events: none; }
+        
         #layer-footer { 
-            width: 1000px; 
-            height: 167px; 
-            bottom: 0; left: 0; 
-            z-index: 10; 
-            /* Fix para que no se vea borroso */
+            width: 1000px; height: 167px; 
+            bottom: 0; left: 0; z-index: 10; 
+            /* Evita blur en bordes */
             image-rendering: -webkit-optimize-contrast;
         }
-
-        /* CAPA 3: PASTILLA BLANCA (Fondo Título) */
-        .title-pill {
-            position: absolute;
-            top: 70px; left: 200px; 
-            height: 70px;
-            background: rgba(255,255,255, 0.95);
-            border-radius: 0 50px 50px 0; 
-            z-index: 15; 
-            min-width: 100px;
-            /* Sombra sutil para separar del fondo si es claro */
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-        }
-
-        /* CAPA 4: ICONO ANIMAL */
+        
         #layer-badge { 
-            width: 187px; height: 155px;
-            top: 30px; left: 30px; 
-            z-index: 20; 
+            width: 187px; height: 155px; 
+            top: 30px; left: 30px; z-index: 30; 
         }
 
-        /* CAPA 5: TÍTULO (Texto Azul) */
-        #txt-title {
+        /* --- SOLUCIÓN DEL TEXTO (FLEXBOX) --- */
+        /* Esta es la clave para que se vea bien y no deformado */
+        .title-container {
             position: absolute;
-            top: 73px; /* Ajuste fino de centrado vertical en la pastilla */
-            left: 230px; 
-            color: var(--azul); 
+            top: 70px; 
+            left: 180px; /* Se mete debajo del badge un poco */
+            z-index: 20; /* Encima del fondo, debajo del badge */
+            
+            /* FLEXBOX MÁGICO: La caja crece con el texto */
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            
+            height: 75px; /* Altura fija de la pastilla */
+            min-width: 100px; /* Ancho mínimo */
+            
+            background: rgba(255,255,255, 0.95); /* Blanco casi puro */
+            border-radius: 0 50px 50px 0; /* Redondeado solo a la derecha */
+            
+            /* PADDING: Empuja el texto visualmente */
+            padding-left: 60px; /* Espacio para no chocar con el badge */
+            padding-right: 40px; /* Aire al final */
+            
+            /* Cero bordes, cero sombras raras */
+            box-shadow: none;
+            border: none;
+        }
+
+        #txt-title {
+            color: var(--azul-carrefour); 
             font-family: 'Ubuntu', sans-serif;
             font-weight: 700;
             font-size: 50px; 
-            line-height: 1.2;
-            z-index: 30;
-            white-space: nowrap; /* Prohibido bajar de línea */
-            transform: translateZ(0); /* Acelera renderizado GPU */
+            line-height: 1;
+            white-space: nowrap; /* Obligatorio: Texto en una sola línea */
+            margin: 0;
+            padding-bottom: 6px; /* Ajuste óptico vertical */
         }
 
-        /* CAPA 6: PESO (Texto Blanco) - FIXED POSICIÓN */
+        /* --- PESO / UNIDAD --- */
         #txt-weight {
-            position: absolute;
-            bottom: 50px; /* Centrado en la franja azul */
-            right: 0;     /* Pegado a la derecha */
-            width: 215px; /* Ancho exacto del bloque azul derecho */
-            text-align: center; /* Centrado dentro del bloque */
+            position: absolute; 
+            bottom: 50px; 
+            right: 0; 
+            width: 215px; /* Coincide con el bloque azul del footer */
+            text-align: center; 
             
             color: #FFFFFF;
-            font-family: 'Ubuntu', sans-serif;
-            font-weight: 700;
+            font-family: 'Ubuntu', sans-serif; 
+            font-weight: 700; 
             font-size: 55px; 
-            line-height: 1;
-            z-index: 40;
+            line-height: 1; 
+            z-index: 40; 
             white-space: nowrap;
-            /* Sombra suave para mejorar legibilidad/nitidez */
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <h2>💎 Generador Carrefour PRO</h2>
-        <p style="color:#aaa;">Modo: <b>Alta Fidelidad (1000x1000px)</b></p>
-        <p style="color:#aaa; font-size:0.9em;">CSV requerido: <b>nombre_producto, categoria, imagen_url, coccion, unidad</b></p>
+    <div class="panel-control">
+        <h1>🏭 Generador Masivo Carrefour (HD)</h1>
+        <p>
+            Modo: <b>Producción 1000x1000px</b><br>
+            Formato: <b>WebP (Optimizado)</b><br>
+            Columnas CSV: <i>nombre_producto, categoria, imagen_url, coccion, unidad</i>
+        </p>
         
-        <label>1. Seleccionar CSV</label>
-        <input type="file" id="csv-file" accept=".csv">
+        <div class="input-group">
+            <label>1. Subir Archivo CSV</label>
+            <input type="file" id="csv-file" accept=".csv">
+        </div>
 
-        <button id="btn-process" class="btn-action" onclick="startBatch()">🚀 GENERAR ZIP MASIVO</button>
+        <button id="btn-process" class="btn-download" onclick="startBatch()">🚀 PROCESAR Y DESCARGAR ZIP</button>
 
-        <div class="log-area" id="console-log">Esperando archivo...</div>
+        <div class="console-log" id="console-log">Sistema listo. Esperando archivo...</div>
     </div>
 
     <div id="shadow-factory">
         <div class="canvas-container" id="capture-area">
-            <div id="bg-layer" class="bg-image"></div>
             
-            <img id="layer-footer" class="layer" src="footer_full.png">
-            <div id="bg-pill" class="title-pill"></div>
-            <img id="layer-badge" class="layer" src="badge_vaca.png">
+            <div id="bg-layer" class="bg-layer"></div>
             
-            <div id="txt-title">Título Producto</div>
+            <img id="layer-footer" class="layer-png" src="footer_full.png">
+            
+            <img id="layer-badge" class="layer-png" src="badge_vaca.png">
+            
+            <div class="title-container">
+                <span id="txt-title">CARGANDO...</span>
+            </div>
+            
             <div id="txt-weight">1.5 kg</div>
+            
         </div>
     </div>
 
     <script>
         const logArea = document.getElementById('console-log');
         
+        // Función de Log con Timestamp
         function log(msg) {
             const time = new Date().toLocaleTimeString();
             logArea.innerHTML += `[${time}] ${msg}<br>`;
             logArea.scrollTop = logArea.scrollHeight;
         }
 
-        // --- LÓGICA DE ASSETS ---
+        // --- LÓGICA DE ASSETS (Mapeo de archivos) ---
         function getBadgeFile(category) {
             const cat = (category || '').toLowerCase();
-            if (cat.includes('vaca') || cat.includes('novillo') || cat.includes('carne') || cat.includes('bovino')) return 'badge_vaca.png';
-            if (cat.includes('cerdo') || cat.includes('puerco') || cat.includes('bondiola')) return 'badge_cerdo.png';
-            if (cat.includes('pollo') || cat.includes('ave') || cat.includes('patitas')) return 'badge_pollo.png';
-            if (cat.includes('pescado') || cat.includes('mar') || cat.includes('filet')) return 'badge_pescado.png';
-            return 'badge_vaca.png'; // Fallback
+            // Lógica de detección difusa para evitar errores de tipeo
+            if (cat.includes('vaca') || cat.includes('novillo') || cat.includes('carne') || cat.includes('bovino') || cat.includes('ternera')) return 'badge_vaca.png';
+            if (cat.includes('cerdo') || cat.includes('puerco') || cat.includes('bondiola') || cat.includes('pechito') || cat.includes('matambre')) return 'badge_cerdo.png';
+            if (cat.includes('pollo') || cat.includes('ave') || cat.includes('patitas') || cat.includes('suprema')) return 'badge_pollo.png';
+            if (cat.includes('pescado') || cat.includes('mar') || cat.includes('filet') || cat.includes('merluza')) return 'badge_pescado.png';
+            return 'badge_vaca.png'; // Default seguro
         }
 
         function getFooterFile(cooking) {
@@ -244,157 +229,181 @@
             const hasHorno = c.includes('horno');
             const hasOlla = c.includes('olla');
 
-            // Combinaciones exactas
+            // Combinaciones (Prioridad Alta)
             if (hasParrilla && hasHorno && hasOlla) return 'footer_full.png';
             if (hasParrilla && hasHorno) return 'footer_parrilla_horno.png';
             if (hasParrilla && hasOlla) return 'footer_parrilla_olla.png';
             if (hasHorno && hasOlla) return 'footer_horno_olla.png';
-            // Individuales
+            
+            // Simples (Prioridad Baja)
             if (hasParrilla) return 'footer_parrilla.png';
             if (hasHorno) return 'footer_horno.png';
             if (hasOlla) return 'footer_olla.png';
             
-            return 'footer_full.png'; // Fallback visualmente completo
+            return 'footer_full.png'; // Default completo
         }
 
-        // --- PREPARAR EL LIENZO ---
+        // --- PREPARACIÓN DEL LIENZO (SETUP) ---
         function setupCanvas(row) {
             return new Promise((resolve, reject) => {
-                // 1. Textos
+                // 1. Asignar Textos
                 const titleEl = document.getElementById('txt-title');
                 const weightEl = document.getElementById('txt-weight');
-                const pillEl = document.getElementById('bg-pill');
+                
+                // Limpieza de datos
+                titleEl.innerText = (row.nombre_producto || 'PRODUCTO').trim();
+                weightEl.innerText = (row.unidad || '').trim();
 
-                titleEl.innerText = row.nombre_producto;
-                weightEl.innerText = row.unidad;
-
-                // Calcular ancho de la pastilla blanca
-                // Formula: 28px por caracter + 60px de margen base. 
-                const estimatedWidth = (row.nombre_producto.length * 28) + 60; 
-                pillEl.style.width = estimatedWidth + 'px';
-
-                // 2. Imágenes PNG
+                // 2. Asignar PNGs
                 document.getElementById('layer-badge').src = getBadgeFile(row.categoria);
                 document.getElementById('layer-footer').src = getFooterFile(row.coccion);
 
-                // 3. Fondo (Carga segura)
+                // 3. Cargar Fondo (Manejo robusto de errores)
                 const imgUrl = row.imagen_url;
                 const bgLayer = document.getElementById('bg-layer');
                 
-                // Limpiamos fondo anterior
+                // Reiniciar fondo para evitar parpadeos de la imagen anterior
                 bgLayer.style.backgroundImage = 'none';
+                bgLayer.style.backgroundColor = '#f0f0f0'; // Fondo gris mientras carga
 
-                // Pre-cargamos la imagen en memoria para asegurar que existe
+                if (!imgUrl) {
+                    log(`⚠️ Fila sin URL de imagen. Usando gris.`);
+                    resolve();
+                    return;
+                }
+
                 const tempImg = new Image();
-                tempImg.crossOrigin = "Anonymous"; // CRÍTICO: Permite descargar imágenes de otros dominios
+                tempImg.crossOrigin = "Anonymous"; // CRÍTICO PARA VTEX/WEB
                 
                 tempImg.onload = () => {
-                    // Una vez cargada, la ponemos de fondo
                     bgLayer.style.backgroundImage = `url('${imgUrl}')`;
                     resolve();
                 };
                 
                 tempImg.onerror = () => {
-                    log(`⚠️ Error cargando imagen: ${imgUrl}. Usando gris.`);
-                    bgLayer.style.backgroundColor = '#cccccc';
-                    resolve(); // Resolvemos igual para no detener el proceso
+                    log(`⚠️ Error cargando imagen remota: ${imgUrl}`);
+                    // Intentamos seguir igual, saldrá fondo gris
+                    resolve();
                 };
 
-                // Iniciar carga con timestamp para evitar caché
-                tempImg.src = imgUrl + (imgUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+                // Truco anti-caché para forzar recarga de imagen
+                const cacheBuster = imgUrl.includes('?') ? '&cb=' : '?cb=';
+                tempImg.src = imgUrl + cacheBuster + new Date().getTime();
             });
         }
 
-        // --- CAPTURA HD ---
+        // --- CAPTURA DE IMAGEN (HTML2CANVAS) ---
         function generateImage() {
             const area = document.getElementById('capture-area');
 
             return new Promise((resolve, reject) => {
-                // Configuración para Máxima Calidad
+                // Configuración de renderizado "High Quality"
                 html2canvas(area, {
-                    scale: 1, // 1 = 1000x1000 exactos (porque el div mide 1000px)
+                    scale: 1,            // 1:1 Pixel Perfect (porque el div ya mide 1000px)
                     width: 1000,
                     height: 1000,
-                    useCORS: true,       // Permite imágenes externas
-                    allowTaint: true,    // Permite ensuciar el canvas (necesario a veces)
-                    backgroundColor: null, // Transparencia real si la hubiera
-                    logging: false,
-                    imageTimeout: 15000, // Esperar más si la red es lenta
+                    useCORS: true,       // Permite imágenes cross-origin
+                    allowTaint: true,    // Permite canvas sucio
+                    backgroundColor: null, // Transparencia real
+                    logging: false,      // Limpiar consola
+                    imageTimeout: 10000, // Esperar hasta 10s por imágenes lentas
                     onclone: (clonedDoc) => {
-                        // Truco para arreglar kerning de fuentes en captura
+                        // Fix para fuentes web y kerning
                         const clonedArea = clonedDoc.getElementById('capture-area');
                         clonedArea.style.fontFeatureSettings = '"liga" 0';
+                        clonedArea.style.transform = 'translateZ(0)'; // Forzar GPU
                     }
                 }).then(canvas => {
-                    // Convertimos a BLOB WebP calidad 92%
+                    // Exportar a WebP calidad 92% (Mejor que JPG)
                     canvas.toBlob((blob) => {
                         if(blob) resolve(blob);
-                        else reject(new Error("Canvas vacío"));
+                        else reject(new Error("Canvas generado vacío"));
                     }, 'image/webp', 0.92);
                 }).catch(err => reject(err));
             });
         }
 
-        // --- BUCLE PRINCIPAL ---
+        // --- PROCESO POR LOTES (BATCH) ---
         async function startBatch() {
             const fileInput = document.getElementById('csv-file');
-            if (!fileInput.files.length) { alert('Por favor sube un archivo CSV.'); return; }
+            if (!fileInput.files.length) { 
+                alert('⚠️ Por favor selecciona un archivo CSV primero.'); 
+                return; 
+            }
 
             const btn = document.getElementById('btn-process');
+            
+            // Bloquear botón
             btn.disabled = true;
-            btn.innerText = '⏳ TRABAJANDO...';
-            logArea.innerHTML = ''; 
-            log('Iniciando motor de renderizado...');
+            btn.innerText = '⏳ INICIANDO MOTOR GRÁFICO...';
+            logArea.innerHTML = ''; // Limpiar log anterior
 
             // Parsear CSV
             Papa.parse(fileInput.files[0], {
                 header: true,
                 skipEmptyLines: true,
+                encoding: "UTF-8", // Asegurar acentos
                 complete: async function(results) {
                     const rows = results.data;
-                    log(`Archivo cargado. ${rows.length} productos detectados.`);
+                    const total = rows.length;
+                    
+                    if (total === 0) {
+                        log('❌ El CSV está vacío o mal formateado.');
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    log(`✅ CSV Cargado. ${total} productos detectados.`);
+                    log(`📦 Preparando ZIP...`);
                     
                     const zip = new JSZip();
-                    const folder = zip.folder("Ofertas_Carrefour_1000x1000");
+                    const folder = zip.folder("Ofertas_Carrefour_HD");
 
-                    // Aseguramos que las fuentes estén listas
-                    log('Cargando tipografía Ubuntu...');
+                    // Asegurar que la fuente Ubuntu esté cargada antes de empezar
+                    log('⏳ Verificando tipografías...');
                     await document.fonts.ready;
-
-                    for (let i = 0; i < rows.length; i++) {
+                    
+                    // Bucle Principal
+                    for (let i = 0; i < total; i++) {
                         const row = rows[i];
+                        
+                        // Validar fila mínima
                         if (!row.nombre_producto) continue;
 
-                        log(`Procesando [${i+1}/${rows.length}]: ${row.nombre_producto}`);
+                        log(`🔄 Procesando [${i+1}/${total}]: ${row.nombre_producto}`);
                         
                         try {
-                            // 1. Montar escena
+                            // 1. Montar la escena
                             await setupCanvas(row);
                             
-                            // 2. Esperar un frame (estabilización visual)
-                            await new Promise(r => setTimeout(r, 100));
+                            // 2. Pequeña pausa técnica (50ms) para que el navegador renderice el DOM
+                            // Esto evita glitches visuales si la CPU va muy rápido
+                            await new Promise(r => setTimeout(r, 50));
 
-                            // 3. Capturar
+                            // 3. Tomar la foto
                             const blob = await generateImage();
                             
-                            // 4. Guardar en ZIP
-                            const safeName = row.nombre_producto
-                                .replace(/[^a-z0-9]/gi, '_')
-                                .toLowerCase() + ".webp";
-                            folder.file(safeName, blob);
+                            // 4. Guardar en memoria ZIP
+                            const cleanName = row.nombre_producto
+                                .replace(/[^a-z0-9]/gi, '_') // Quitar caracteres raros
+                                .toLowerCase();
+                            
+                            folder.file(`${cleanName}.webp`, blob);
 
                         } catch (error) {
-                            log(`❌ FALLÓ ${row.nombre_producto}: ${error.message}`);
+                            log(`❌ ERROR en ${row.nombre_producto}: ${error.message}`);
                         }
                     }
 
-                    log('📦 Empaquetando ZIP (esto puede tardar unos segundos)...');
+                    // Finalización
+                    log('📦 Empaquetando y comprimiendo ZIP...');
                     const content = await zip.generateAsync({type:"blob"});
-                    saveAs(content, "Lote_Carrefour_Final.zip");
                     
-                    log('✅ ¡TERMINADO! Tu descarga debería comenzar.');
+                    saveAs(content, "Carrefour_Ofertas_Lote.zip");
+                    
+                    log('✨ ¡PROCESO TERMINADO! Descarga iniciada.');
                     btn.disabled = false;
-                    btn.innerText = '🚀 GENERAR ZIP MASIVO';
+                    btn.innerText = '🚀 PROCESAR Y DESCARGAR ZIP';
                 }
             });
         }
