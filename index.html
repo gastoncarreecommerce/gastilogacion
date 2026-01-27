@@ -3,68 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Ofertas</title>
+    <title>Generador 1000x1000</title>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --azul: #0B3A8F; --blanco: #FFF; }
-        body { font-family: 'Ubuntu', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        body { font-family: 'Ubuntu', sans-serif; background: #333; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; color: white; }
         
         /* CONTROLES */
-        .controls { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; box-sizing: border-box;}
-        label { display: block; font-weight: bold; margin: 10px 0 5px; }
-        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
-        button { padding: 8px; border: 1px solid #ddd; background: #eee; cursor: pointer; border-radius: 5px; }
-        button.active { background: var(--azul); color: white; border-color: var(--azul); }
+        .controls { background: #444; padding: 20px; border-radius: 10px; width: 100%; max-width: 600px; margin-bottom: 20px; box-sizing: border-box; border: 1px solid #555; }
+        label { display: block; font-weight: bold; margin: 15px 0 5px; color: #ddd; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #666; background: #222; color: white; border-radius: 5px; box-sizing: border-box; }
+        
+        .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 5px; }
+        button { padding: 10px; border: 1px solid #555; background: #555; color: #ccc; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        button.active { background: var(--azul); color: white; border-color: #4a90e2; }
 
-        /* PREVIEW AREA */
+        /* --- ZONA DE DIBUJO --- */
+        
+        /* Wrapper para que se vea chico en pantalla pero sea grande en realidad */
+        .canvas-wrapper {
+            transform: scale(0.5); /* Lo vemos al 50% en pantalla */
+            transform-origin: top center;
+            margin-bottom: -450px; /* Compensamos el espacio */
+            border: 2px solid #666;
+        }
+
         .canvas-container {
             position: relative;
-            width: 500px; /* TAMAÑO FIJO DE TUS PNG */
-            height: 500px;
+            width: 1000px;  /* ANCHO FIJO */
+            height: 1000px; /* ALTO FIJO */
             background: #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             overflow: hidden;
         }
 
-        /* CAPAS (LAYERS) */
-        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        #photo-bg { object-fit: cover; z-index: 1; pointer-events: auto; } /* Foto Usuario */
-        #layer-footer { z-index: 10; } /* Tu PNG azul de abajo */
+        /* CAPAS */
+        .layer { position: absolute; pointer-events: none; }
+        
+        /* 1. FOTO DE FONDO (Cubre todo el 1000x1000) */
+        #photo-bg { 
+            width: 100%; height: 100%; 
+            object-fit: cover; 
+            z-index: 1; 
+        }
+
+        /* 2. FOOTER (Tira de abajo) */
+        #layer-footer { 
+            width: 1000px; 
+            height: 167px; /* ALTO EXACTO */
+            bottom: 0; left: 0;
+            z-index: 10; 
+            object-fit: contain; /* Asegura que no se deforme */
+        }
+
+        /* 3. BADGE / ICONO (Animal arriba a la izq) */
         #layer-badge { 
-            width: auto; height: auto; /* El tamaño lo trae el PNG exportado */
-            top: 0; left: 0; 
+            width: 187px;  /* ANCHO EXACTO */
+            height: 155px; /* ALTO EXACTO */
+            top: 30px;     /* MARGEN SUPERIOR EXACTO */
+            left: 30px;    /* MARGEN IZQUIERDO EXACTO */
             z-index: 20; 
+            object-fit: contain;
         }
 
         /* TEXTOS */
-        .txt { position: absolute; z-index: 30; font-weight: 700; }
+        .txt { position: absolute; z-index: 30; font-weight: 700; font-family: 'Ubuntu', sans-serif; }
+        
         #txt-title {
-            top: 25px; left: 80px; /* AJUSTAR SEGÚN TU DISEÑO DEL BADGE */
-            color: var(--azul); font-size: 24px;
-            background: rgba(255,255,255,0.9); padding: 2px 8px; border-radius: 4px;
+            /* Calculado: 30px (margen) + 187px (icono) + 20px (espacio) = 237px */
+            left: 230px; 
+            top: 70px; /* Centrado visualmente respecto al icono */
+            color: var(--azul); 
+            font-size: 50px; /* Fuente grande para lienzo 1000px */
+            background: rgba(255,255,255,0.95); 
+            padding: 5px 30px; 
+            border-radius: 50px;
         }
+        
         #txt-weight {
-            bottom: 20px; right: 25px; /* AJUSTAR SEGÚN TU FOOTER */
-            color: white; font-size: 22px; text-align: right;
+            bottom: 50px; /* Centrado en el footer de 167px */
+            right: 50px; 
+            color: white; 
+            font-size: 55px; 
+            text-align: right;
+        }
+
+        .download-btn {
+            background: #28a745; color: white; font-size: 18px; width: 100%; max-width: 600px;
+            padding: 15px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; font-weight: bold;
         }
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h2>🎛 Panel de Control</h2>
+        <h2>📏 Generador Carrefour (1000x1000)</h2>
         
-        <label>1. Subir Foto Producto</label>
+        <label>1. Foto Producto</label>
         <input type="file" id="inp-file" accept="image/*">
 
-        <label>2. Texto Header</label>
+        <label>2. Textos</label>
         <input type="text" id="inp-title" value="Asado de Novillo" oninput="update()">
+        <input type="text" id="inp-weight" value="1.5 kg" style="margin-top:5px;" oninput="update()">
 
-        <label>3. Peso / Unidad</label>
-        <input type="text" id="inp-weight" value="1.5 kg" oninput="update()">
-
-        <label>4. Animal</label>
+        <label>3. Animal</label>
         <div class="btn-group">
             <button onclick="setAnimal('vaca', this)" class="active">Vaca</button>
             <button onclick="setAnimal('cerdo', this)">Cerdo</button>
@@ -72,37 +113,40 @@
             <button onclick="setAnimal('pescado', this)">Pescado</button>
         </div>
 
-        <label>5. Cocción</label>
+        <label>4. Cocción</label>
         <select id="sel-footer" onchange="setFooter()">
-            <option value="footer_full.png">Full (Parrilla+Horno+Olla)</option>
+            <option value="footer_full.png">Completo (Parrilla + Horno + Olla)</option>
             <option value="footer_parrilla.png">Solo Parrilla</option>
             <option value="footer_horno.png">Solo Horno</option>
             <option value="footer_olla.png">Solo Olla</option>
-            </select>
-
-        <button onclick="downloadImage()" style="width:100%; margin-top:20px; background:#28a745; color:white; font-size:16px;">📸 Descargar Imagen</button>
+            <option value="footer_parrilla_horno.png">Parrilla + Horno</option>
+            <option value="footer_parrilla_olla.png">Parrilla + Olla</option>
+            <option value="footer_horno_olla.png">Horno + Olla</option>
+        </select>
     </div>
 
-    <div class="canvas-container" id="capture-area">
-        <img id="photo-bg" class="layer" src="https://via.placeholder.com/500x500?text=Sube+tu+Foto">
-        
-        <img id="layer-footer" class="layer" src="footer_full.png">
-        
-        <img id="layer-badge" class="layer" src="badge_vaca.png">
-
-        <div id="txt-title" class="txt">Asado de Novillo</div>
-        <div id="txt-weight" class="txt">1.5 kg</div>
+    <div class="canvas-wrapper">
+        <div class="canvas-container" id="capture-area">
+            <img id="photo-bg" class="layer" src="https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?q=80&w=1080&auto=format&fit=crop">
+            
+            <img id="layer-footer" class="layer" src="footer_full.png">
+            
+            <img id="layer-badge" class="layer" src="badge_vaca.png">
+            
+            <div id="txt-title" class="txt">Asado de Novillo</div>
+            <div id="txt-weight" class="txt">1.5 kg</div>
+        </div>
     </div>
+
+    <button class="download-btn" onclick="downloadImage()">📸 DESCARGAR IMAGEN</button>
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
-        // Actualizar textos
         function update() {
             document.getElementById('txt-title').innerText = document.getElementById('inp-title').value;
             document.getElementById('txt-weight').innerText = document.getElementById('inp-weight').value;
         }
 
-        // Subir foto
         document.getElementById('inp-file').addEventListener('change', e => {
             if(e.target.files[0]) {
                 const reader = new FileReader();
@@ -111,24 +155,22 @@
             }
         });
 
-        // Cambiar Animal
         function setAnimal(name, btn) {
             document.getElementById('layer-badge').src = 'badge_' + name + '.png';
             document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         }
 
-        // Cambiar Footer
         function setFooter() {
             document.getElementById('layer-footer').src = document.getElementById('sel-footer').value;
         }
 
-        // Descargar (Usa html2canvas para tomar la foto)
         function downloadImage() {
-            html2canvas(document.getElementById('capture-area')).then(canvas => {
+            const element = document.getElementById('capture-area');
+            html2canvas(element, { scale: 1, backgroundColor: null }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'oferta-carrefour.jpg';
-                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.download = 'oferta-1000x1000.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
                 link.click();
             });
         }
