@@ -1,970 +1,137 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hero Builder PRO — Batch</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Ofertas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --azul: #0B3A8F; --blanco: #FFF; }
+        body { font-family: 'Ubuntu', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* CONTROLES */
+        .controls { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; box-sizing: border-box;}
+        label { display: block; font-weight: bold; margin: 10px 0 5px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
+        button { padding: 8px; border: 1px solid #ddd; background: #eee; cursor: pointer; border-radius: 5px; }
+        button.active { background: var(--azul); color: white; border-color: var(--azul); }
 
-  <!-- Ubuntu -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-
-  <!-- JSZip -->
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-
-  <style>
-    :root{
-      --bg:#070b14;
-      --panel:#0e1630cc;
-      --panel2:#0b1226cc;
-      --text:#eaf0ff;
-      --muted:#a8b3cf;
-      --line:rgba(255,255,255,.08);
-      --btn:#16224a;
-      --btn2:#2c55ff;
-      --ok:#20c997;
-      --warn:#ffcc00;
-      --bad:#ff4d4f;
-      --shadow: 0 20px 60px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: Ubuntu, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1000px 600px at 20% 0%, #142a66 0%, rgba(20,42,102,0) 60%),
-        radial-gradient(900px 500px at 80% 10%, #1b2b8f 0%, rgba(27,43,143,0) 55%),
-        linear-gradient(180deg, #050812 0%, var(--bg) 70%);
-    }
-    .app{max-width:1280px;margin:0 auto;padding:18px 18px 36px}
-
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between; gap:14px;
-      padding:16px 18px; border:1px solid var(--line); border-radius:18px;
-      background:rgba(14,22,48,.65); backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-    }
-    .brand{display:flex;flex-direction:column;gap:4px;min-width:280px}
-    .brand h1{margin:0;font-size:16px;letter-spacing:.2px}
-    .brand p{margin:0;font-size:12px;color:var(--muted);line-height:1.3}
-
-    .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-    .btn{
-      border:1px solid var(--line);
-      background:var(--btn);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:14px;
-      font-weight:700;
-      cursor:pointer;
-      display:inline-flex; align-items:center; gap:8px;
-      transition: transform .06s ease, filter .2s ease;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn:hover{filter:brightness(1.06)}
-    .btn:active{transform:translateY(1px)}
-    .btnPrimary{background:var(--btn2); border-color: rgba(255,255,255,.18)}
-    .btnGhost{background:transparent}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-
-    .errorBar{
-      margin-top:12px;
-      border:1px solid rgba(255,77,79,.35);
-      background:rgba(255,77,79,.12);
-      padding:10px 12px;
-      border-radius:14px;
-      display:none;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .errorBar strong{color:var(--bad)}
-    .errorBar code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size:12px;
-      color:rgba(255,255,255,.92);
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-
-    .grid{
-      margin-top:16px;
-      display:grid;
-      grid-template-columns: 420px 1fr;
-      gap:16px;
-      align-items:start;
-    }
-    @media (max-width:1100px){
-      .grid{grid-template-columns:1fr}
-    }
-
-    .panel{
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:rgba(14,22,48,.65);
-      backdrop-filter: blur(10px);
-      padding:16px;
-      box-shadow: var(--shadow);
-    }
-    .panel h2{
-      margin:0 0 12px;
-      font-size:13px;
-      letter-spacing:.2px;
-      color:var(--muted);
-    }
-
-    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-    .field span{font-size:12px;color:var(--muted)}
-
-    input, select{
-      width:100%;
-      background:rgba(0,0,0,.18);
-      border:1px solid var(--line);
-      color:var(--text);
-      padding:10px 10px;
-      border-radius:14px;
-      outline:none;
-      font-family: Ubuntu, system-ui, sans-serif;
-      min-width:0;
-    }
-    input[type="color"]{
-      height:42px;
-      padding:6px;
-    }
-
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .fieldset{
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
-      margin:12px 0;
-      background:rgba(0,0,0,.08);
-    }
-    .fieldset legend{
-      padding:0 8px;
-      color:var(--muted);
-      font-size:12px;
-      font-weight:700;
-    }
-    .check{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
-    .hint{margin:10px 0 0; color:var(--muted); font-size:12px; line-height:1.4}
-
-    .pill{
-      display:inline-flex;align-items:center;gap:6px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(0,0,0,.14); color:var(--muted); font-size:12px;
-    }
-
-    .listHeader{
-      display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;
-      flex-wrap:wrap;
-    }
-    .listHeader .left{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    .cards{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap:14px;
-    }
-    @media (max-width:1100px){
-      .cards{grid-template-columns:1fr}
-    }
-
-    .card{
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:rgba(11,18,38,.65);
-      padding:12px;
-      box-shadow: 0 12px 40px rgba(0,0,0,.25);
-      display:grid;
-      grid-template-columns: 180px 1fr;
-      gap:12px;
-      align-items:start;
-      min-width:0;
-    }
-    .thumbWrap{
-      display:flex;flex-direction:column;gap:8px;align-items:center;min-width:0
-    }
-    .thumb{
-      width:180px;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background:#fff;
-      overflow:hidden;
-    }
-    .thumb canvas{
-      display:block;
-      width:180px; height:180px;
-      background:#fff;
-    }
-
-    .metaTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom:8px;
-      min-width:0;
-    }
-    .filename{
-      font-size:12px;color:var(--muted);
-      overflow:hidden; text-overflow:ellipsis;
-      white-space:nowrap;
-      min-width:0;
-      max-width: 100%;
-    }
-
-    .status{
-      font-size:12px;
-      padding:4px 8px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(0,0,0,.12);
-      white-space:nowrap;
-      flex:0 0 auto;
-    }
-    .status.ok{color:var(--ok)}
-    .status.warn{color:var(--warn)}
-    .status.bad{color:var(--bad)}
-
-    .miniRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
-    .chipRow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-    .chip{
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.14);
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .chip.on{background:rgba(44,85,255,.25); color:var(--text); border-color: rgba(44,85,255,.55)}
-
-    .cardActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .btnTiny{padding:8px 10px;border-radius:12px;font-size:12px}
-
-    .previewNote{margin-top:8px; font-size:12px; color:var(--muted)}
-  </style>
-</head>
-
-<body>
-<div class="app">
-  <header class="topbar">
-    <div class="brand">
-      <h1>Hero Builder PRO — Batch (premium)</h1>
-      <p>Subí imágenes, editá títulos/íconos, y exportá todo a ZIP. Preview fijo, export independiente.</p>
-    </div>
-    <div class="actions">
-      <button id="btnAddFiles" class="btn btnGhost">➕ Cargar imágenes</button>
-      <button id="btnApplyPresetAll" class="btn">✨ Aplicar preset a todos</button>
-      <button id="btnExportZip" class="btn btnPrimary" disabled>🏁 Exportar ZIP</button>
-    </div>
-  </header>
-
-  <div class="errorBar" id="errorBar">
-    <strong>⚠ Error detectado:</strong>
-    <code id="errorText"></code>
-  </div>
-
-  <main class="grid">
-    <section class="panel">
-      <h2>Configuración global</h2>
-
-      <label class="field">
-        <span>Cargar imágenes (múltiples)</span>
-        <input id="fileMulti" type="file" accept="image/*" multiple />
-      </label>
-
-      <div class="row">
-        <label class="field">
-          <span>Azul corporativo</span>
-          <input id="brandBlue" type="color" value="#0B3A8F" />
-        </label>
-
-        <label class="field">
-          <span>Export size</span>
-          <select id="exportSize">
-            <option value="500" selected>500 × 500 (ref)</option>
-            <option value="1000">1000 × 1000</option>
-            <option value="1500">1500 × 1500</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="row">
-        <label class="field">
-          <span>Formato de peso</span>
-          <input id="defaultWeight" type="text" value="x kg" maxlength="12" />
-        </label>
-
-        <label class="field">
-          <span>Divisores en footer</span>
-          <select id="dividersMode">
-            <option value="soft" selected>Suaves (premium)</option>
-            <option value="off">Sin divisores</option>
-            <option value="strong">Fuertes</option>
-          </select>
-        </label>
-      </div>
-
-      <fieldset class="fieldset">
-        <legend>Preset de cocciones</legend>
-        <div class="chipRow" id="presetCooks">
-          <div class="chip on" data-cook="grill">Parrilla</div>
-          <div class="chip on" data-cook="oven">Horno</div>
-          <div class="chip on" data-cook="pot">Olla</div>
-        </div>
-        <p class="hint">Se aplica como default y después ajustás por item.</p>
-      </fieldset>
-
-      <fieldset class="fieldset">
-        <legend>Layout</legend>
-        <label class="check"><input id="centerCookIcons" type="checkbox" checked> Cocciones centradas (1/2/3)</label>
-        <label class="check"><input id="titleCenteredInArea" type="checkbox" checked> Título centrado en el área derecha</label>
-        <p class="hint">Si lo querés “pegado” como reference, destildá el centrado del título.</p>
-      </fieldset>
-
-      <div class="pill" id="countPill">0 imágenes cargadas</div>
-      <p class="hint">Si algo falla, arriba te va a mostrar el error real (no “Error” genérico).</p>
-    </section>
-
-    <section class="panel">
-      <div class="listHeader">
-        <div class="left">
-          <h2 style="margin:0">Batch</h2>
-          <span class="pill">Preview fijo · Export independiente</span>
-        </div>
-        <div class="left">
-          <button id="btnClear" class="btn btnTiny">🧹 Limpiar</button>
-        </div>
-      </div>
-
-      <div class="cards" id="cards"></div>
-
-      <p class="previewNote">Si te aparece “Error”, mirá el detalle arriba (barra roja) y lo arreglamos en 1 tiro.</p>
-    </section>
-  </main>
-</div>
-
-<script>
-/* ==========================
-   ICONOS (URLs opcionales)
-   ========================== */
-const ICON_URLS = {
-  animal: { cow:"", pig:"", chicken:"", fish:"", lamb:"" },
-  cook: { grill:"", oven:"", pot:"" }
-};
-
-const FALLBACK_SVGS = {
-  animal: {
-    cow: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><g fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M26 42c-4-8-1-17 9-19"/><path d="M70 42c4-8 1-17-9-19"/><path d="M33 37c4-6 9-9 15-9s11 3 15 9"/><path d="M30 53c0-10 8-16 18-16s18 6 18 16v8c0 12-8 20-18 20s-18-8-18-20z"/></g></svg>`,
-    pig: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><g fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M30 53c0-12 8-20 18-20s18 8 18 20v8c0 12-8 20-18 20s-18-8-18-20z"/></g></svg>`,
-    chicken:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><g fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M30 56c0-12 9-21 20-21s20 9 20 21-9 21-20 21-20-9-20-21z"/></g></svg>`,
-    fish:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><g fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M26 52c10-14 30-18 48-8 6 3 10 6 14 8-4 2-8 5-14 8-18 10-38 6-48-8z"/><path d="M26 52l-10-8 2 8-2 8z"/></g></svg>`,
-    lamb:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><g fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M30 54c0-12 8-20 18-20s18 8 18 20v8c0 12-8 20-18 20s-18-8-18-20z"/></g></svg>`
-  },
-  cook: {
-    grill:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 40h40"/><path d="M24 48h32"/><path d="M26 56h28"/><path d="M30 20c0 6-6 6-6 12"/><path d="M40 18c0 6-6 6-6 12"/><path d="M50 20c0 6-6 6-6 12"/></g></svg>`,
-    oven:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="18" width="44" height="50" rx="6"/><path d="M18 30h44"/></g></svg>`,
-    pot:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 34h36"/><path d="M20 36v8c0 16 8 26 20 26s20-10 20-26v-8"/></g></svg>`
-  }
-};
-
-/* ==========================
-   ERROR PANEL (real reason)
-   ========================== */
-const errorBar = document.getElementById("errorBar");
-const errorText = document.getElementById("errorText");
-function showError(msg){
-  errorText.textContent = String(msg || "Error desconocido");
-  errorBar.style.display = "flex";
-}
-function clearError(){
-  errorBar.style.display = "none";
-  errorText.textContent = "";
-}
-window.addEventListener("error", (e)=> showError(e.error?.stack || e.message));
-window.addEventListener("unhandledrejection", (e)=> showError(e.reason?.stack || e.reason));
-
-/* ==========================
-   CANVAS + RENDER HELPERS
-   ========================== */
-function svgToDataUrl(svg){ return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); }
-
-function loadImage(src){
-  return new Promise((resolve,reject)=>{
-    const img = new Image();
-    // OJO: para data: y blob: no hace falta crossOrigin, pero no rompe.
-    img.crossOrigin = "anonymous";
-    img.onload = ()=> resolve(img);
-    img.onerror = (err)=> reject(new Error("No se pudo cargar imagen/icono: " + src));
-    img.src = src;
-  });
-}
-
-async function getIcon(kind, key){
-  try{
-    const url = ICON_URLS?.[kind]?.[key];
-    if(url && url.trim()) return await loadImage(url.trim());
-  }catch(e){
-    // si falla URL, cae al fallback
-    console.warn(e);
-  }
-  const svg = FALLBACK_SVGS?.[kind]?.[key];
-  if(!svg) throw new Error(`Icono fallback inexistente: kind=${kind} key=${key}`);
-  return await loadImage(svgToDataUrl(svg));
-}
-
-function loadFileAsImage(file){
-  return new Promise((resolve,reject)=>{
-    const img = new Image();
-    img.onload = ()=> resolve(img);
-    img.onerror = ()=> reject(new Error("No se pudo cargar el archivo de imagen (¿formato no soportado?): " + file.name));
-    img.src = URL.createObjectURL(file);
-  });
-}
-
-function setHiDPI(canvas, ctx, cssW, cssH){
-  const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-  canvas.style.width = cssW + "px";
-  canvas.style.height = cssH + "px";
-  canvas.width = Math.round(cssW * dpr);
-  canvas.height = Math.round(cssH * dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  return dpr;
-}
-
-function drawCover(ctx, img, x,y,w,h){
-  const iw=img.width, ih=img.height;
-  const ir=iw/ih, r=w/h;
-  let sw,sh,sx,sy;
-  if(ir>r){ sh=ih; sw=ih*r; sx=(iw-sw)/2; sy=0; }
-  else { sw=iw; sh=iw/r; sx=0; sy=(ih-sh)/2; }
-  ctx.imageSmoothingEnabled = true;
-  ctx.drawImage(img, sx,sy,sw,sh, x,y,w,h);
-}
-
-function crispLine(ctx, x1,y1,x2,y2, w=1){
-  ctx.lineWidth = w;
-  const off = (w%2)?0.5:0;
-  ctx.beginPath();
-  ctx.moveTo(Math.round(x1)+off, Math.round(y1)+off);
-  ctx.lineTo(Math.round(x2)+off, Math.round(y2)+off);
-  ctx.stroke();
-}
-
-function wrap2(ctx, text, maxW){
-  const words=(text||"").trim().split(/\s+/).filter(Boolean);
-  if(!words.length) return [""];
-  let line="", lines=[];
-  for(let i=0;i<words.length;i++){
-    const test=line?`${line} ${words[i]}`:words[i];
-    if(ctx.measureText(test).width<=maxW) line=test;
-    else { lines.push(line||words[i]); line=words[i]; break; }
-  }
-  if(!lines.length){
-    if(ctx.measureText(line).width<=maxW) return [line];
-    lines.push(line);
-  }
-  // segunda linea con ellipsis
-  let second=line;
-  for(let i=0;i<words.length;i++){
-    const test=second?`${second} ${words[i]}`:words[i];
-    if(ctx.measureText(test).width<=maxW) second=test;
-    else break;
-  }
-  if(second && second!==lines[0]){
-    let s=second, ell="…";
-    while(ctx.measureText(s+ell).width>maxW && s.length>1) s=s.slice(0,-1);
-    if(ctx.measureText(second).width>maxW) second=s+ell;
-    return [lines[0], second];
-  }
-  return [lines[0]];
-}
-
-/* ==========================
-   RENDER ENGINE (BASE 500)
-   ========================== */
-const BASE = 500;
-function layoutFor(size){
-  const s = size / BASE;
-  return {
-    margin: Math.round(20*s),
-    headerTop: Math.round(14*s),
-    tile: Math.round(66*s),
-    gap: Math.round(16*s),
-
-    footerH: Math.round(130*s),
-    weightW: Math.round(140*s),
-
-    titleFont: Math.round(38*s),
-    weightFont: Math.round(42*s),
-
-    cookIcon: Math.round(58*s),
-    cookGap: Math.round(24*s),
-    animalPadRatio: 0.18
-  };
-}
-
-async function renderHeroToCanvas(opts){
-  const {
-    canvas, ctx, photoImg, title, animal, cooks, weight,
-    blue, dividersMode, centerCookIcons, titleCenteredInArea, size
-  } = opts;
-
-  setHiDPI(canvas, ctx, size, size);
-
-  try{
-    if(document.fonts?.load){
-      await document.fonts.load(`700 ${Math.round(size*0.08)}px Ubuntu`);
-    }
-  }catch(e){
-    // no rompemos por fonts
-    console.warn("Font load failed:", e);
-  }
-
-  const L = layoutFor(size);
-
-  // BG
-  if(photoImg) drawCover(ctx, photoImg, 0,0,size,size);
-  else { ctx.fillStyle="#fff"; ctx.fillRect(0,0,size,size); }
-
-  // Header tile
-  ctx.fillStyle = blue;
-  ctx.fillRect(L.margin, L.headerTop, L.tile, L.tile);
-
-  // Animal icon (si falla, dibuja círculo)
-  try{
-    const aImg = await getIcon("animal", animal);
-    const pad = Math.round(L.tile * L.animalPadRatio);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(aImg, L.margin+pad, L.headerTop+pad, L.tile-pad*2, L.tile-pad*2);
-  }catch(e){
-    console.warn(e);
-    ctx.strokeStyle="#fff"; ctx.lineWidth=4;
-    ctx.beginPath(); ctx.arc(L.margin+L.tile/2, L.headerTop+L.tile/2, (L.tile*0.22), 0, Math.PI*2); ctx.stroke();
-  }
-
-  // Title
-  ctx.fillStyle = blue;
-  ctx.font = `700 ${L.titleFont}px Ubuntu, sans-serif`;
-  const titleX = L.margin + L.tile + L.gap;
-  const titleMaxW = size - L.margin - titleX;
-  const lines = wrap2(ctx, title || "", titleMaxW);
-  const lineH = Math.round(L.titleFont*1.12);
-  const totalH = lines.length * lineH;
-  const firstY = L.headerTop + Math.round((L.tile-totalH)/2) + lineH;
-
-  ctx.textBaseline="alphabetic";
-  if(titleCenteredInArea){
-    ctx.textAlign="center";
-    const cx = titleX + titleMaxW/2;
-    lines.forEach((ln,i)=> ctx.fillText(ln, cx, firstY + i*lineH));
-  }else{
-    ctx.textAlign="left";
-    lines.forEach((ln,i)=> ctx.fillText(ln, titleX, firstY + i*lineH));
-  }
-  ctx.textAlign="left";
-
-  // Footer
-  const footerY = size - L.footerH;
-  ctx.fillStyle = blue;
-  ctx.fillRect(0, footerY, size, L.footerH);
-
-  const leftW = size - L.weightW;
-
-  // Dividers
-  if(dividersMode !== "off"){
-    const alpha = (dividersMode==="strong") ? 0.42 : 0.26;
-    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-    crispLine(ctx, leftW, footerY, leftW, size, 1);
-    const slotW = leftW/3;
-    crispLine(ctx, slotW*1, footerY, slotW*1, size, 1);
-    crispLine(ctx, slotW*2, footerY, slotW*2, size, 1);
-  }
-
-  // Cook icons
-  const selected = (cooks || []).slice(0,3);
-  const iconY = footerY + Math.round((L.footerH - L.cookIcon)/2);
-
-  const drawCook = async (img, x) => {
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(img, x, iconY, L.cookIcon, L.cookIcon);
-  };
-
-  if(centerCookIcons){
-    const count = selected.length;
-    if(count>0){
-      const totalW = count*L.cookIcon + (count-1)*L.cookGap;
-      const startX = Math.round((leftW-totalW)/2);
-      for(let i=0;i<count;i++){
-        try{
-          const img = await getIcon("cook", selected[i]);
-          await drawCook(img, startX + i*(L.cookIcon+L.cookGap));
-        }catch(e){
-          console.warn(e);
+        /* PREVIEW AREA */
+        .canvas-container {
+            position: relative;
+            width: 500px; /* TAMAÑO FIJO DE TUS PNG */
+            height: 500px;
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            overflow: hidden;
         }
-      }
-    }
-  }else{
-    const slotW = leftW/3;
-    for(let i=0;i<selected.length;i++){
-      try{
-        const img = await getIcon("cook", selected[i]);
-        const x = Math.round(slotW*i + (slotW-L.cookIcon)/2);
-        await drawCook(img, x);
-      }catch(e){
-        console.warn(e);
-      }
-    }
-  }
 
-  // Weight
-  ctx.fillStyle="#fff";
-  ctx.font = `700 ${L.weightFont}px Ubuntu, sans-serif`;
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-  ctx.fillText(weight || "x kg", leftW + L.weightW/2, footerY + L.footerH/2);
-  ctx.textAlign="left";
-  ctx.textBaseline="alphabetic";
-}
+        /* CAPAS (LAYERS) */
+        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        #photo-bg { object-fit: cover; z-index: 1; pointer-events: auto; } /* Foto Usuario */
+        #layer-footer { z-index: 10; } /* Tu PNG azul de abajo */
+        #layer-badge { 
+            width: auto; height: auto; /* El tamaño lo trae el PNG exportado */
+            top: 0; left: 0; 
+            z-index: 20; 
+        }
 
-/* ==========================
-   UI + STATE
-   ========================== */
-const $ = (id)=>document.getElementById(id);
-const fileMulti = $("fileMulti");
-const cardsEl = $("cards");
-const countPill = $("countPill");
+        /* TEXTOS */
+        .txt { position: absolute; z-index: 30; font-weight: 700; }
+        #txt-title {
+            top: 25px; left: 80px; /* AJUSTAR SEGÚN TU DISEÑO DEL BADGE */
+            color: var(--azul); font-size: 24px;
+            background: rgba(255,255,255,0.9); padding: 2px 8px; border-radius: 4px;
+        }
+        #txt-weight {
+            bottom: 20px; right: 25px; /* AJUSTAR SEGÚN TU FOOTER */
+            color: white; font-size: 22px; text-align: right;
+        }
+    </style>
+</head>
+<body>
 
-const brandBlueEl = $("brandBlue");
-const exportSizeEl = $("exportSize");
-const defaultWeightEl = $("defaultWeight");
-const dividersModeEl = $("dividersMode");
-const centerCookIconsEl = $("centerCookIcons");
-const titleCenteredInAreaEl = $("titleCenteredInArea");
+    <div class="controls">
+        <h2>🎛 Panel de Control</h2>
+        
+        <label>1. Subir Foto Producto</label>
+        <input type="file" id="inp-file" accept="image/*">
 
-const btnExportZip = $("btnExportZip");
-const btnClear = $("btnClear");
-const btnAddFiles = $("btnAddFiles");
-const btnApplyPresetAll = $("btnApplyPresetAll");
-const presetCookWrap = $("presetCooks");
+        <label>2. Texto Header</label>
+        <input type="text" id="inp-title" value="Asado de Novillo" oninput="update()">
 
-let presetCooks = new Set(["grill","oven","pot"]);
+        <label>3. Peso / Unidad</label>
+        <input type="text" id="inp-weight" value="1.5 kg" oninput="update()">
 
-const state = { items: [] };
-
-function updateCount(){
-  countPill.textContent = `${state.items.length} imágenes cargadas`;
-  btnExportZip.disabled = state.items.length === 0;
-}
-
-function makeId(){ return Math.random().toString(36).slice(2,10); }
-
-function guessTitleFromFilename(name){
-  const base = name.replace(/\.[^/.]+$/, "");
-  const cleaned = base.replace(/[_-]+/g," ").replace(/\s+/g," ").trim();
-  return cleaned ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1) : "Producto";
-}
-
-function escapeHtml(s){
-  return String(s||"")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function safeFilename(name){
-  return String(name||"hero")
-    .trim().toLowerCase()
-    .replace(/[^\w\s-]/g,"")
-    .replace(/\s+/g,"_")
-    .slice(0,80) || "hero";
-}
-
-function downloadBlob(blob, filename){
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
-}
-
-function cookSetToArray(set){ return Array.from(set); }
-
-function setStatus(item, kind, text){
-  item.statusEl.className = "status " + kind;
-  item.statusEl.textContent = text;
-}
-
-function createCard(item){
-  const card = document.createElement("div");
-  card.className = "card";
-  card.dataset.id = item.id;
-
-  card.innerHTML = `
-    <div class="thumbWrap">
-      <div class="thumb"><canvas></canvas></div>
-      <div class="status warn">Render...</div>
-    </div>
-
-    <div style="min-width:0">
-      <div class="metaTop">
-        <div class="filename" title="${escapeHtml(item.filename)}">${escapeHtml(item.filename)}</div>
-        <div class="pill">Preview</div>
-      </div>
-
-      <div class="field" style="margin-bottom:8px">
-        <span>Título</span>
-        <input type="text" class="inTitle" value="${escapeHtml(item.title)}" maxlength="80" />
-      </div>
-
-      <div class="miniRow">
-        <label class="field" style="margin:0">
-          <span>Animal</span>
-          <select class="inAnimal">
-            <option value="cow">Vaca</option>
-            <option value="pig">Cerdo</option>
-            <option value="chicken">Pollo</option>
-            <option value="fish">Pescado</option>
-            <option value="lamb">Cordero</option>
-          </select>
-        </label>
-
-        <label class="field" style="margin:0">
-          <span>Peso</span>
-          <input type="text" class="inWeight" value="${escapeHtml(item.weight)}" maxlength="12" />
-        </label>
-      </div>
-
-      <div class="fieldset" style="margin-top:10px">
-        <legend>Cocciones</legend>
-        <div class="chipRow">
-          <div class="chip" data-cook="grill">Parrilla</div>
-          <div class="chip" data-cook="oven">Horno</div>
-          <div class="chip" data-cook="pot">Olla</div>
+        <label>4. Animal</label>
+        <div class="btn-group">
+            <button onclick="setAnimal('vaca', this)" class="active">Vaca</button>
+            <button onclick="setAnimal('cerdo', this)">Cerdo</button>
+            <button onclick="setAnimal('pollo', this)">Pollo</button>
+            <button onclick="setAnimal('pescado', this)">Pescado</button>
         </div>
-      </div>
 
-      <div class="cardActions">
-        <button class="btn btnTiny btnGhost actDownload">⬇ PNG</button>
-        <button class="btn btnTiny actRemove">🗑 Quitar</button>
-      </div>
+        <label>5. Cocción</label>
+        <select id="sel-footer" onchange="setFooter()">
+            <option value="footer_full.png">Full (Parrilla+Horno+Olla)</option>
+            <option value="footer_parrilla.png">Solo Parrilla</option>
+            <option value="footer_horno.png">Solo Horno</option>
+            <option value="footer_olla.png">Solo Olla</option>
+            </select>
+
+        <button onclick="downloadImage()" style="width:100%; margin-top:20px; background:#28a745; color:white; font-size:16px;">📸 Descargar Imagen</button>
     </div>
-  `;
 
-  const c = card.querySelector("canvas");
-  item.canvas = c;
-  item.ctx = c.getContext("2d");
+    <div class="canvas-container" id="capture-area">
+        <img id="photo-bg" class="layer" src="https://via.placeholder.com/500x500?text=Sube+tu+Foto">
+        
+        <img id="layer-footer" class="layer" src="footer_full.png">
+        
+        <img id="layer-badge" class="layer" src="badge_vaca.png">
 
-  // preview fixed 180×180
-  setHiDPI(item.canvas, item.ctx, 180, 180);
+        <div id="txt-title" class="txt">Asado de Novillo</div>
+        <div id="txt-weight" class="txt">1.5 kg</div>
+    </div>
 
-  // defaults
-  const sel = card.querySelector(".inAnimal");
-  sel.value = item.animal;
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        // Actualizar textos
+        function update() {
+            document.getElementById('txt-title').innerText = document.getElementById('inp-title').value;
+            document.getElementById('txt-weight').innerText = document.getElementById('inp-weight').value;
+        }
 
-  // chips
-  card.querySelectorAll(".chip").forEach(ch=>{
-    const k = ch.dataset.cook;
-    if(item.cooks.has(k)) ch.classList.add("on");
-    ch.addEventListener("click", ()=>{
-      if(item.cooks.has(k)) item.cooks.delete(k); else item.cooks.add(k);
-      ch.classList.toggle("on");
-      scheduleItemRender(item);
-    });
-  });
+        // Subir foto
+        document.getElementById('inp-file').addEventListener('change', e => {
+            if(e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(evt) { document.getElementById('photo-bg').src = evt.target.result; };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
 
-  card.querySelector(".inTitle").addEventListener("input", (e)=>{ item.title = e.target.value; scheduleItemRender(item); });
-  card.querySelector(".inAnimal").addEventListener("change",(e)=>{ item.animal = e.target.value; scheduleItemRender(item); });
-  card.querySelector(".inWeight").addEventListener("input",(e)=>{ item.weight = e.target.value; scheduleItemRender(item); });
+        // Cambiar Animal
+        function setAnimal(name, btn) {
+            document.getElementById('layer-badge').src = 'badge_' + name + '.png';
+            document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
 
-  card.querySelector(".actRemove").addEventListener("click", ()=> removeItem(item.id));
-  card.querySelector(".actDownload").addEventListener("click", async ()=>{
-    const blob = await exportOne(item);
-    downloadBlob(blob, safeFilename(item.title || item.filename) + ".png");
-  });
+        // Cambiar Footer
+        function setFooter() {
+            document.getElementById('layer-footer').src = document.getElementById('sel-footer').value;
+        }
 
-  item.cardEl = card;
-  item.statusEl = card.querySelector(".status");
-  return card;
-}
-
-function scheduleItemRender(item){
-  if(item.rendering) return;
-  item.rendering = true;
-  requestAnimationFrame(async ()=>{
-    item.rendering = false;
-    try{
-      clearError();
-      setStatus(item, "warn", "Render...");
-      await renderHeroToCanvas({
-        canvas: item.canvas,
-        ctx: item.ctx,
-        photoImg: item.img,
-        title: item.title,
-        animal: item.animal,
-        cooks: cookSetToArray(item.cooks),
-        weight: item.weight,
-        blue: brandBlueEl.value,
-        dividersMode: dividersModeEl.value,
-        centerCookIcons: centerCookIconsEl.checked,
-        titleCenteredInArea: titleCenteredInAreaEl.checked,
-        size: 180
-      });
-      setStatus(item, "ok", "OK");
-    }catch(e){
-      console.error(e);
-      setStatus(item, "bad", "Error");
-      showError(e?.stack || e?.message || e);
-    }
-  });
-}
-
-async function addFiles(files){
-  const arr = Array.from(files || []);
-  if(!arr.length) return;
-
-  for(const f of arr){
-    const id = makeId();
-    let img;
-    try{
-      img = await loadFileAsImage(f);
-    }catch(e){
-      showError(e?.message || e);
-      continue;
-    }
-
-    const item = {
-      id, file:f, img,
-      filename:f.name,
-      title: guessTitleFromFilename(f.name),
-      animal:"cow",
-      cooks:new Set(presetCooks),
-      weight: defaultWeightEl.value || "x kg",
-      canvas:null, ctx:null, cardEl:null, statusEl:null,
-      rendering:false
-    };
-
-    state.items.push(item);
-    const card = createCard(item);
-    cardsEl.prepend(card);
-    scheduleItemRender(item);
-  }
-
-  updateCount();
-}
-
-function removeItem(id){
-  const idx = state.items.findIndex(x=>x.id===id);
-  if(idx === -1) return;
-  const [item] = state.items.splice(idx,1);
-  item.cardEl?.remove();
-  updateCount();
-}
-
-function clearAll(){
-  state.items = [];
-  cardsEl.innerHTML = "";
-  updateCount();
-}
-
-/* EXPORT */
-async function exportOne(item){
-  const size = Number(exportSizeEl.value);
-  const off = document.createElement("canvas");
-  const offCtx = off.getContext("2d");
-
-  await renderHeroToCanvas({
-    canvas: off,
-    ctx: offCtx,
-    photoImg: item.img,
-    title: item.title,
-    animal: item.animal,
-    cooks: cookSetToArray(item.cooks),
-    weight: item.weight,
-    blue: brandBlueEl.value,
-    dividersMode: dividersModeEl.value,
-    centerCookIcons: centerCookIconsEl.checked,
-    titleCenteredInArea: titleCenteredInAreaEl.checked,
-    size
-  });
-
-  return await new Promise((resolve)=> off.toBlob(b=>resolve(b), "image/png"));
-}
-
-async function exportZip(){
-  try{
-    clearError();
-    const zip = new JSZip();
-    const folder = zip.folder("heroes");
-
-    for(const item of state.items){
-      setStatus(item, "warn", "Export...");
-      const blob = await exportOne(item);
-      const buf = await blob.arrayBuffer();
-      folder.file(`${safeFilename(item.title || item.filename)}.png`, buf);
-      setStatus(item, "ok", "OK");
-    }
-
-    const zipBlob = await zip.generateAsync({type:"blob"});
-    downloadBlob(zipBlob, `heroes_${exportSizeEl.value}x${exportSizeEl.value}.zip`);
-  }catch(e){
-    console.error(e);
-    showError(e?.stack || e?.message || e);
-  }
-}
-
-/* PRESET UI */
-presetCookWrap.querySelectorAll(".chip").forEach(ch=>{
-  ch.addEventListener("click", ()=>{
-    const k = ch.dataset.cook;
-    if(presetCooks.has(k)) presetCooks.delete(k); else presetCooks.add(k);
-    ch.classList.toggle("on");
-  });
-});
-
-function applyPresetAll(){
-  const weight = defaultWeightEl.value || "x kg";
-  for(const item of state.items){
-    item.weight = weight;
-    item.cooks = new Set(presetCooks);
-    if(item.cardEl){
-      item.cardEl.querySelector(".inWeight").value = item.weight;
-      item.cardEl.querySelectorAll(".chip").forEach(ch=>{
-        ch.classList.toggle("on", item.cooks.has(ch.dataset.cook));
-      });
-    }
-    scheduleItemRender(item);
-  }
-}
-
-function rerenderAll(){
-  for(const item of state.items) scheduleItemRender(item);
-}
-
-/* Bind */
-const btnExportZip = document.getElementById("btnExportZip");
-const btnClear = document.getElementById("btnClear");
-const btnAddFiles = document.getElementById("btnAddFiles");
-const btnApplyPresetAll = document.getElementById("btnApplyPresetAll");
-const fileMulti = document.getElementById("fileMulti");
-
-btnExportZip.addEventListener("click", exportZip);
-btnClear.addEventListener("click", clearAll);
-btnAddFiles.addEventListener("click", ()=> fileMulti.click());
-btnApplyPresetAll.addEventListener("click", applyPresetAll);
-
-fileMulti.addEventListener("change", async (e)=>{
-  await addFiles(e.target.files);
-  e.target.value = "";
-});
-
-brandBlueEl.addEventListener("input", rerenderAll);
-dividersModeEl.addEventListener("change", rerenderAll);
-centerCookIconsEl.addEventListener("change", rerenderAll);
-titleCenteredInAreaEl.addEventListener("change", rerenderAll);
-
-updateCount();
-</script>
+        // Descargar (Usa html2canvas para tomar la foto)
+        function downloadImage() {
+            html2canvas(document.getElementById('capture-area')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'oferta-carrefour.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+            });
+        }
+    </script>
 </body>
 </html>
