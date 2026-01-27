@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador FINAL BLINDADO</title>
+    <title>Generador FINAL (Fondo CSS Fix)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap" rel="stylesheet">
@@ -20,24 +20,27 @@
         button.active { background: var(--azul); color: white; border-color: #4a90e2; }
 
         /* --- ZONA DE DIBUJO (WRAPPER) --- */
-        /* Este contenedor se encarga de mostrarlo pequeño en pantalla */
         .canvas-wrapper {
             transform: scale(0.5); /* Zoom visual al 50% */
             transform-origin: top center;
             margin-bottom: -480px; 
             border: 2px solid #555;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            transition: opacity 0.2s; /* Suaviza el proceso de captura */
+            transition: opacity 0.2s;
         }
 
-        /* EL LIENZO REAL (Siempre mide 1000x1000 internamente) */
+        /* EL LIENZO REAL (1000x1000) */
         .canvas-container {
             position: relative;
             width: 1000px;
             height: 1000px;
-            background: #fff;
+            /* CAMBIO CLAVE: El fondo ahora es CSS */
+            background-color: #fff;
+            background-image: url('https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?q=80&w=1080&auto=format&fit=crop');
+            background-size: cover;   /* Cubre todo el espacio */
+            background-position: center; /* Se centra automáticamente */
+            background-repeat: no-repeat;
             overflow: hidden;
-            /* Optimizaciones de renderizado de texto */
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
         }
@@ -45,8 +48,7 @@
         /* CAPAS GENÉRICAS */
         .layer { position: absolute; pointer-events: none; }
         
-        /* 1. FOTO FONDO */
-        #photo-bg { width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        /* ELIMINADO: #photo-bg ya no es necesario */
 
         /* 2. FOOTER (ABAJO) */
         #layer-footer { 
@@ -77,9 +79,9 @@
             top: 75px; left: 230px; 
             color: var(--azul); 
             font-size: 50px;
-            line-height: 1; /* Importante para evitar saltos raros */
+            line-height: 1;
             z-index: 30;
-            white-space: nowrap; /* ¡CANDADO! Prohíbe que el texto baje a una segunda línea */
+            white-space: nowrap;
         }
 
         /* 6. CONTENEDOR DEL PESO */
@@ -103,7 +105,7 @@
 <body>
 
     <div class="controls">
-        <h2>🎯 Generador Final (Renderizado Nativo)</h2>
+        <h2>🎯 Generador Final (Fondo CSS Fix)</h2>
         <label>1. Foto Producto</label>
         <input type="file" id="inp-file" accept="image/*">
         <label>2. Textos</label>
@@ -130,7 +132,6 @@
 
     <div class="canvas-wrapper" id="wrapper-target">
         <div class="canvas-container" id="capture-area">
-            <img id="photo-bg" src="https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?q=80&w=1080&auto=format&fit=crop" crossorigin="anonymous">
             <img id="layer-footer" class="layer" src="footer_full.png">
             <div id="bg-pill" class="title-pill"></div>
             <img id="layer-badge" class="layer" src="badge_vaca.png">
@@ -143,7 +144,7 @@
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
-        // --- Funciones de actualización (igual que antes) ---
+        // --- Funciones de actualización ---
         function update() {
             const title = document.getElementById('inp-title').value;
             document.getElementById('txt-title').innerText = title;
@@ -151,13 +152,19 @@
             const width = (title.length * 28) + 60; 
             document.getElementById('bg-pill').style.width = width + 'px';
         }
+        
+        // CAMBIO CLAVE EN EL SCRIPT:
+        // Ahora actualizamos el background-image del contenedor
         document.getElementById('inp-file').addEventListener('change', e => {
             if(e.target.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(evt) { document.getElementById('photo-bg').src = evt.target.result; };
+                reader.onload = function(evt) { 
+                    document.getElementById('capture-area').style.backgroundImage = `url('${evt.target.result}')`;
+                };
                 reader.readAsDataURL(e.target.files[0]);
             }
         });
+
         function setAnimal(name, btn) {
             document.getElementById('layer-badge').src = 'badge_' + name + '.png';
             document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
@@ -167,7 +174,7 @@
             document.getElementById('layer-footer').src = document.getElementById('sel-footer').value;
         }
 
-        // --- NUEVA LÓGICA DE DESCARGA "NINJA" ---
+        // --- LÓGICA DE DESCARGA "NINJA" (Igual que antes) ---
         function downloadImage() {
             const btn = document.getElementById('dwn-btn');
             const wrapper = document.getElementById('wrapper-target');
@@ -176,40 +183,32 @@
             btn.innerText = '⏳ Procesando a tamaño real...';
             btn.disabled = true;
             
-            // 1. Guardar el estado visual actual
             const originalWrapperStyle = wrapper.getAttribute('style') || '';
 
-            // 2. Mover el wrapper fuera de pantalla y quitarle el zoom (scale)
-            // Esto fuerza a que el navegador lo renderice a 1000x1000 nativo
             wrapper.style.position = 'fixed';
             wrapper.style.top = '-9999px';
             wrapper.style.left = '0';
-            wrapper.style.transform = 'none'; // ¡Clave! Quitamos el scale(0.5)
+            wrapper.style.transform = 'none';
             wrapper.style.margin = '0';
-            wrapper.style.opacity = '0'; // Para que no parpadee
+            wrapper.style.opacity = '0';
 
-            // Esperamos un tick para asegurar que el DOM se actualizó
             setTimeout(() => {
-                 // Asegurar carga de fuentes antes de capturar
                 document.fonts.ready.then(() => {
                     html2canvas(area, { 
-                        scale: 1, // Capturamos a tamaño nativo (1000px), no hace falta escalar
+                        scale: 1,
                         useCORS: true,
-                        backgroundColor: null,
+                        // backgroundColor: null, // Ya no es necesario, lo maneja el CSS
                         logging: false,
-                         // Truco para evitar doble renderizado de texto en algunos navegadores
                         onclone: (clonedDoc) => {
                              clonedDoc.getElementById('capture-area').style.fontFeatureSettings = '"liga" 0';
                         }
                     }).then(canvas => {
-                        // 3. Restaurar la vista previa inmediatamente
                         wrapper.setAttribute('style', originalWrapperStyle);
                         btn.innerText = '📸 DESCARGAR WEBP PERFECTO';
                         btn.disabled = false;
 
-                        // 4. Descargar
                         const link = document.createElement('a');
-                        link.download = 'oferta-carrefour-final.webp';
+                        link.download = 'oferta-carrefour-final-cssbg.webp';
                         link.href = canvas.toDataURL('image/webp', 0.92);
                         link.click();
                     });
