@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Generador Carrefour ULTRA WEBP</title>
+  <title>Generador de headers PFT</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -370,7 +370,7 @@
       <div class="brand">
         <div class="logo"><span>🏭</span></div>
         <div class="titleBlock">
-          <h1>Generador Carrefour <span style="opacity:.85">ULTRA WEBP</span></h1>
+          <h1>Generador de haders <span style="opacity:.85">PFT Carrefour</span></h1>
           <div class="sub">
             <span class="pill">Ultra HD</span>
             <span>CSV → ZIP (.webp a calidad 0.95)</span>
@@ -415,7 +415,7 @@
           <div class="stickyBar">
             <button id="btn-process" class="primary" onclick="startBatch()">
               <span>🚀</span>
-              <span>Generar imágenes WEBP</span>
+              <span>Generar headers</span>
             </button>
 
             <div class="progressWrap">
@@ -459,7 +459,7 @@
             <li><b>Campos esperados:</b> <code>nombre_producto</code>, <code>unidad</code>, <code>imagen_url</code>, <code>categoria</code>, <code>coccion</code>.</li>
             <li>Si <code>imagen_url</code> está vacío, igual genera (queda fondo gris).</li>
             <li>Si una imagen no carga por CORS, se loguea el warning y se sigue.</li>
-            <li>El ZIP final se descarga como <b>Carrefour_UltraHD_WEBP.zip</b>.</li>
+            <li>El ZIP final se descarga como <b>Headers_PFT.zip</b>.</li>
           </ul>
         </div>
       </div>
@@ -724,7 +724,7 @@ Suprema de Pollo,1 kg,https://cdn.tu-dominio.com/pollo.jpg,pollo,horno`;
           log("📦 Comprimiendo ZIP…", "warn");
 
           const content = await zip.generateAsync({type:"blob"});
-          saveAs(content, "Carrefour_UltraHD_WEBP.zip");
+          saveAs(content, "Headers_PFT.zip");
 
           setProgress(100, "Terminado. ZIP descargado.");
           log("✅ ¡TERMINADO!", "ok");
