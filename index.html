@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Carrefour FINAL (ANSI FIX)</title>
+    <title>Generador Carrefour FINAL ROBUSTO</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,126 +15,81 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
-        /* ESTILOS DE INTERFAZ */
+        /* --- ESTILOS VISUALES --- */
         :root { --azul-carrefour: #0B3A8F; }
+        body { font-family: 'Ubuntu', sans-serif; background: #222; margin: 0; padding: 20px; color: white; display: flex; flex-direction: column; align-items: center; }
         
-        body { 
-            font-family: 'Ubuntu', sans-serif; background: #121212; margin: 0; padding: 40px; 
-            display: flex; flex-direction: column; align-items: center; color: white; 
-        }
+        .panel { background: #333; padding: 30px; border-radius: 12px; width: 100%; max-width: 800px; border: 1px solid #444; margin-bottom: 20px;}
+        h1 { margin-top: 0; border-bottom: 2px solid var(--azul-carrefour); padding-bottom: 10px; }
         
-        .panel-control { 
-            background: #1e1e1e; padding: 40px; border-radius: 16px; 
-            width: 100%; max-width: 700px; border: 1px solid #333; 
-        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #ccc; }
+        select, input { width: 100%; padding: 10px; background: #111; border: 1px solid #555; color: white; border-radius: 5px; }
         
-        h1 { margin: 0 0 10px 0; color: #fff; font-size: 26px; }
-        .subtitle { color: #ff5722; margin-bottom: 30px; font-weight: bold; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+        .console { background: #000; color: #0f0; font-family: monospace; padding: 15px; height: 200px; overflow-y: auto; border-radius: 5px; font-size: 12px; border: 1px solid #555; }
         
-        .input-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 10px; color: #ddd; }
-        input[type="file"] { 
-            background: #252525; padding: 20px; width: 100%; 
-            border: 2px dashed #444; border-radius: 8px; color: #fff; box-sizing: border-box;
-        }
+        .btn-main { background: var(--azul-carrefour); color: white; width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin-top: 10px;}
+        .btn-main:hover { background: #154bb5; }
+        .btn-main:disabled { background: #555; cursor: not-allowed; }
+
+        /* --- FÁBRICA FANTASMA (1000x1000) --- */
+        #shadow-factory { position: fixed; top: 0; left: -10000px; width: 1000px; height: 1000px; background: #fff; z-index: -9999; }
+        .canvas-container { position: relative; width: 1000px; height: 1000px; overflow: hidden; image-rendering: high-quality; }
         
-        .btn-download {
-            background: var(--azul-carrefour); color: white; font-size: 18px; width: 100%; 
-            padding: 20px; border: none; border-radius: 10px; cursor: pointer; 
-            margin-top: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-        .btn-download:hover { background: #154bb5; transform: translateY(-2px); }
-        .btn-download:disabled { background: #333; opacity: 0.7; cursor: not-allowed; transform: none; }
-
-        .console-log { 
-            background: #000; color: #00ff00; font-family: 'Consolas', monospace; 
-            padding: 20px; height: 200px; overflow-y: auto; margin-top: 30px; 
-            border-radius: 8px; font-size: 12px; border: 1px solid #333;
-        }
-
-        /* --- FÁBRICA FANTASMA --- */
-        #shadow-factory {
-            position: fixed; top: 0; left: -10000px; 
-            width: 1000px; height: 1000px;
-            background-color: #ffffff; z-index: -9999;
-        }
-
-        /* LIENZO DE RENDERIZADO */
-        .canvas-container {
-            position: relative; width: 1000px; height: 1000px; overflow: hidden;
-            image-rendering: high-quality; -webkit-font-smoothing: antialiased;
-        }
-
-        /* FONDO */
-        .bg-layer {
-            position: absolute; top: 0; left: 0; width: 1000px; height: 1000px;
-            background-size: cover; background-position: center; background-repeat: no-repeat;
-            z-index: 1;
-        }
-
-        /* CAPAS PNG */
-        .layer-png { position: absolute; pointer-events: none; image-rendering: high-quality; }
+        /* CAPAS */
+        .bg-layer { position: absolute; top: 0; left: 0; width: 1000px; height: 1000px; background-size: cover; background-position: center; z-index: 1; }
+        .layer-png { position: absolute; pointer-events: none; }
         #layer-footer { width: 1000px; height: 167px; bottom: 0; left: 0; z-index: 10; }
         #layer-badge { width: 187px; height: 155px; top: 30px; left: 30px; z-index: 30; }
 
-        /* --- TÍTULO (FLEXBOX MEJORADO) --- */
-        .title-container {
-            position: absolute; 
-            top: 70px; 
-            left: 180px; 
-            z-index: 20; 
-            
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: flex-start;
-            
+        /* TÍTULO AUTO-AJUSTABLE */
+        .title-pill {
+            position: absolute; top: 70px; left: 180px; z-index: 20;
+            display: inline-flex; align-items: center;
             height: 75px; 
-            min-width: 100px;
-            background: #ffffff; 
-            border-radius: 0 50px 50px 0; 
-            
-            /* PADDING EXTRA A LA DERECHA (80px) PARA QUE NO SE CORTE */
-            padding-left: 60px; 
-            padding-right: 80px; 
-            
-            box-shadow: none; border: none;
+            background: #fff; 
+            border-radius: 0 50px 50px 0;
+            padding-left: 60px; padding-right: 50px;
+            max-width: 780px; /* Límite para no salirse del canvas */
+            box-sizing: border-box;
         }
-
         #txt-title {
-            color: var(--azul-carrefour); 
-            font-family: 'Ubuntu', sans-serif; 
-            font-weight: 700; 
-            font-size: 50px; 
-            line-height: 1; 
-            white-space: nowrap; 
-            margin: 0; padding: 0;
-            /* Ajuste fino vertical */
-            transform: translateY(-3px); 
+            color: var(--azul-carrefour); font-weight: 700; font-size: 50px; line-height: 1; 
+            white-space: nowrap; margin: 0;
         }
 
         /* PESO */
         #txt-weight {
-            position: absolute; bottom: 50px; right: 0; width: 215px; text-align: center; 
-            color: #FFFFFF; font-family: 'Ubuntu', sans-serif; font-weight: 700; font-size: 55px; 
-            line-height: 1; z-index: 40; white-space: nowrap;
+            position: absolute; bottom: 50px; right: 0; width: 215px; text-align: center;
+            color: #fff; font-weight: 700; font-size: 55px; line-height: 1; z-index: 40; white-space: nowrap;
         }
     </style>
 </head>
 <body>
 
-    <div class="panel-control">
-        <h1>🏭 Generador Carrefour</h1>
-        <div class="subtitle">☢️ MODO NUCLEAR: CORRECCIÓN DE ACENTOS EXTREMA</div>
+    <div class="panel">
+        <h1>🛠️ Generador Carrefour: Repair Station</h1>
         
-        <div class="input-group">
-            <label>1. Subir CSV (Excel Estándar)</label>
-            <input type="file" id="csv-file" accept=".csv">
+        <div class="grid-2">
+            <div>
+                <label>1. Archivo CSV</label>
+                <input type="file" id="csv-file" accept=".csv">
+            </div>
+            <div>
+                <label>2. Codificación del Excel</label>
+                <select id="encoding-select">
+                    <option value="ISO-8859-1" selected>Excel Clásico / Español (Windows-1252)</option>
+                    <option value="UTF-8">UTF-8 (Moderno)</option>
+                </select>
+            </div>
         </div>
 
-        <button id="btn-process" class="btn-download" onclick="startBatch()">🚀 GENERAR (ISO-8859-1)</button>
-
-        <div class="console-log" id="console-log">Esperando archivo...</div>
+        <button id="btn-process" class="btn-main" onclick="startBatch()">🚀 PROCESAR IMÁGENES</button>
+        
+        <div style="margin-top: 10px; font-size: 0.9em; color: #aaa;">
+            LOG DEL SISTEMA:
+        </div>
+        <div class="console" id="console-log">Esperando archivo...</div>
     </div>
 
     <div id="shadow-factory">
@@ -142,10 +97,10 @@
             <div id="bg-layer" class="bg-layer"></div>
             <img id="layer-footer" class="layer-png" src="footer_full.png">
             <img id="layer-badge" class="layer-png" src="badge_vaca.png">
-            <div class="title-container">
-                <span id="txt-title">CARGANDO...</span>
+            <div class="title-pill">
+                <span id="txt-title">TITULO</span>
             </div>
-            <div id="txt-weight">1.5 kg</div>
+            <div id="txt-weight">1 KG</div>
         </div>
     </div>
 
@@ -156,22 +111,46 @@
             logArea.scrollTop = logArea.scrollHeight;
         }
 
-        // --- ASSETS ---
-        function getBadgeFile(category) {
-            const cat = (category || '').toLowerCase().trim();
-            // Mapeo exacto
-            if (cat === 'carne vacuna') return 'badge_vaca.png';
-            if (cat === 'carne de cerdo') return 'badge_cerdo.png';
-            if (cat === 'pollo y granja') return 'badge_pollo.png';
-            if (cat === 'pescados y mariscos') return 'badge_pescado.png';
-            // Fallbacks
-            if (cat.includes('vaca') || cat.includes('bovino')) return 'badge_vaca.png';
-            if (cat.includes('cerdo') || cat.includes('puerco')) return 'badge_cerdo.png';
-            if (cat.includes('pollo') || cat.includes('ave')) return 'badge_pollo.png';
-            if (cat.includes('pesca') || cat.includes('mar')) return 'badge_pescado.png';
-            return 'badge_vaca.png'; 
+        // --- 1. LÓGICA DE DETECCIÓN INTELIGENTE DE ÍCONO ---
+        function getBadgeFile(row) {
+            // Unimos categoría y nombre para buscar palabras clave
+            const textToSearch = ((row.categoria || '') + ' ' + (row.nombre_producto || '')).toLowerCase();
+
+            // Prioridad CERDO (Arregla lo del Jamón)
+            if (textToSearch.includes('cerdo') || 
+                textToSearch.includes('puerco') || 
+                textToSearch.includes('jamon') || 
+                textToSearch.includes('jamón') || 
+                textToSearch.includes('fiambre') ||
+                textToSearch.includes('bondiola') ||
+                textToSearch.includes('panceta') ||
+                textToSearch.includes('pechito')) {
+                return 'badge_cerdo.png';
+            }
+
+            // POLLO
+            if (textToSearch.includes('pollo') || 
+                textToSearch.includes('ave') || 
+                textToSearch.includes('patitas') || 
+                textToSearch.includes('suprema') ||
+                textToSearch.includes('granja')) {
+                return 'badge_pollo.png';
+            }
+
+            // PESCADO
+            if (textToSearch.includes('pescado') || 
+                textToSearch.includes('mar') || 
+                textToSearch.includes('filet') || 
+                textToSearch.includes('merluza') ||
+                textToSearch.includes('calamar')) {
+                return 'badge_pescado.png';
+            }
+
+            // DEFAULT: VACA (Cualquier otra carne roja)
+            return 'badge_vaca.png';
         }
 
+        // --- 2. LÓGICA DE FOOTER ---
         function getFooterFile(cooking) {
             const c = (cooking || '').toLowerCase();
             const hasParrilla = c.includes('parrilla');
@@ -188,40 +167,62 @@
             return 'footer_full.png';
         }
 
-        // --- LIMPIADOR DE TEXTO MANUAL ---
-        // Si la codificación automática falla, esto lo fuerza manualmente
-        function fixEncoding(text) {
-            if (!text) return "";
-            try {
-                // Arreglos comunes de ANSI mal interpretado como UTF-8
-                return text
-                    .replace(/Ã³|/g, "ó")
-                    .replace(/Ã¡/g, "á")
-                    .replace(/Ã©/g, "é")
-                    .replace(/Ã/g, "í")
-                    .replace(/Ãº/g, "ú")
-                    .replace(/Ã±/g, "ñ")
-                    .replace(/Ã\*/g, "Ñ")
-                    .replace(/\?/g, ""); // Borra signos de interrogación sueltos si quedan
-            } catch (e) {
-                return text;
+        // --- 3. AUTO-AJUSTE DE TEXTO (Para que no se corte) ---
+        function fitText() {
+            const titleEl = document.getElementById('txt-title');
+            const containerWidth = 750; // Espacio máximo disponible aprox
+            let fontSize = 50; // Tamaño inicial
+            
+            // Reseteamos
+            titleEl.style.fontSize = fontSize + 'px';
+            
+            // Reducimos mientras sea más ancho que el contenedor
+            while (titleEl.offsetWidth > containerWidth && fontSize > 20) {
+                fontSize -= 2;
+                titleEl.style.fontSize = fontSize + 'px';
             }
         }
 
-        // --- SETUP ---
-        function setupCanvas(row) {
+        // --- 4. NORMALIZADOR DE COLUMNAS (Para que encuentre "Unidad") ---
+        function normalizeRowKeys(row) {
+            const newRow = {};
+            Object.keys(row).forEach(key => {
+                // Quitamos espacios, pasamos a minúsculas y quitamos acentos del header
+                const cleanKey = key.trim().toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+                newRow[cleanKey] = row[key];
+            });
+            return newRow;
+        }
+
+        // --- 5. SETUP DEL LIENZO ---
+        function setupCanvas(rawRow) {
             return new Promise((resolve, reject) => {
-                // APLICAMOS LIMPIEZA
-                const tituloLimpio = row.nombre_producto || 'PRODUCTO';
-                const unidadLimpia = row.unidad || '';
+                // Normalizamos las columnas (Unidad -> unidad, Peso -> unidad)
+                const row = normalizeRowKeys(rawRow);
 
-                document.getElementById('txt-title').innerText = tituloLimpio.trim();
-                document.getElementById('txt-weight').innerText = unidadLimpia.trim();
+                // Mapeo flexible de la columna peso/unidad
+                // Busca 'unidad', 'peso', 'contenido', 'cantidad'
+                const unitValue = row.unidad || row.peso || row.contenido || row.cantidad || '';
+                
+                if (!unitValue) {
+                    console.warn("Fila sin unidad detectada:", row);
+                }
 
-                document.getElementById('layer-badge').src = getBadgeFile(row.categoria);
+                // Asignar textos
+                const titleEl = document.getElementById('txt-title');
+                titleEl.innerText = (row.nombre_producto || row.producto || 'SIN NOMBRE').trim();
+                document.getElementById('txt-weight').innerText = unitValue.trim();
+
+                // Ejecutar ajuste de tamaño de fuente
+                fitText();
+
+                // Asignar imágenes
+                document.getElementById('layer-badge').src = getBadgeFile(row); // Pasamos toda la fila
                 document.getElementById('layer-footer').src = getFooterFile(row.coccion);
 
-                const imgUrl = row.imagen_url;
+                // Fondo
+                const imgUrl = row.imagen_url || row.imagen || row.foto || '';
                 const bgLayer = document.getElementById('bg-layer');
                 bgLayer.style.backgroundImage = 'none';
                 
@@ -229,22 +230,20 @@
 
                 const tempImg = new Image();
                 tempImg.crossOrigin = "Anonymous"; 
-                
                 tempImg.onload = () => {
                     bgLayer.style.backgroundImage = `url('${imgUrl}')`;
                     resolve();
                 };
-                
                 tempImg.onerror = () => {
-                    log(`⚠️ Error imagen: ${imgUrl}`);
-                    bgLayer.style.backgroundColor = '#333';
+                    log(`⚠️ Falló imagen: ${imgUrl}`);
+                    bgLayer.style.backgroundColor = '#444';
                     resolve();
                 };
                 tempImg.src = imgUrl + (imgUrl.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
             });
         }
 
-        // --- CAPTURA ---
+        // --- 6. CAPTURA ---
         function generateImage() {
             const area = document.getElementById('capture-area');
             return new Promise((resolve, reject) => {
@@ -254,73 +253,73 @@
                     allowTaint: true,
                     backgroundColor: null,
                     logging: false,
-                    onclone: (clonedDoc) => {
-                        const clonedArea = clonedDoc.getElementById('capture-area');
-                        clonedArea.style.fontFeatureSettings = '"liga" 0';
-                        clonedArea.style.imageRendering = 'high-quality'; 
+                    onclone: (doc) => {
+                        const el = doc.getElementById('capture-area');
+                        el.style.fontFeatureSettings = '"liga" 0';
+                        el.style.imageRendering = 'high-quality';
                     }
                 }).then(canvas => {
-                    canvas.toBlob((blob) => {
-                        if(blob) resolve(blob);
-                        else reject(new Error("Canvas vacío"));
-                    }, 'image/webp', 0.95);
-                }).catch(err => reject(err));
+                    canvas.toBlob(blob => resolve(blob), 'image/webp', 0.95);
+                }).catch(reject);
             });
         }
 
-        // --- BATCH ---
+        // --- MOTOR PRINCIPAL ---
         async function startBatch() {
             const fileInput = document.getElementById('csv-file');
+            const encoding = document.getElementById('encoding-select').value;
+            
             if (!fileInput.files.length) { alert('Falta el CSV'); return; }
 
             const btn = document.getElementById('btn-process');
-            btn.disabled = true; btn.innerText = '⏳ PROCESANDO (MODO ANSI)...';
+            btn.disabled = true; btn.innerText = '⏳ PROCESANDO...';
             logArea.innerHTML = '';
 
-            // EL CAMBIO CLAVE ESTÁ ACÁ: ISO-8859-1
             Papa.parse(fileInput.files[0], {
-                header: true, 
-                skipEmptyLines: true, 
-                encoding: "ISO-8859-1", // <--- ESTO FUERZA LECTURA DE EXCEL VIEJO/ESPAÑOL
+                header: true,
+                skipEmptyLines: true,
+                encoding: encoding, // Usamos la selección del usuario
                 complete: async function(results) {
                     const rows = results.data;
                     
                     if(rows.length > 0) {
-                         // Mostramos cómo se leyó el primer producto para verificar
-                         log(`🔍 Prueba de lectura: "${rows[0].nombre_producto}"`);
+                        const firstRow = normalizeRowKeys(rows[0]);
+                        log(`🔍 Prueba de lectura: "${firstRow.nombre_producto || '??'}"`);
+                        log(`🔍 Peso detectado: "${firstRow.unidad || firstRow.peso || 'VACÍO'}"`);
                     }
 
                     const zip = new JSZip();
-                    const folder = zip.folder("Carrefour_Final_ANSI");
+                    const folder = zip.folder("Carrefour_Final_Fixed");
 
                     await document.fonts.ready;
                     
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
-                        if (!row.nombre_producto) continue;
-                        
-                        log(`📸 Procesando: ${row.nombre_producto}`);
-                        
+                        // Validar si la fila tiene datos reales
+                        if (!Object.values(row).some(x => x)) continue;
+
                         try {
-                            await setupCanvas(row);
-                            await new Promise(r => setTimeout(r, 100)); 
+                            // Normalizamos para obtener el nombre correcto para el log
+                            const nRow = normalizeRowKeys(row);
+                            const pName = nRow.nombre_producto || 'Producto_' + i;
+                            
+                            log(`📸 Generando: ${pName}`);
+                            
+                            await setupCanvas(row); // Pasamos la fila cruda, setup normaliza dentro
+                            await new Promise(r => setTimeout(r, 50)); 
                             const blob = await generateImage();
                             
-                            // Limpieza del nombre de archivo también
-                            const cleanName = row.nombre_producto
-                                .replace(/[^a-z0-9]/gi, '_')
-                                .toLowerCase();
-                                
+                            const cleanName = pName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                             folder.file(`${cleanName}.webp`, blob); 
 
                         } catch (error) { log(`❌ Error: ${error.message}`); }
                     }
 
-                    log('📦 Comprimiendo ZIP...');
+                    log('📦 Creando ZIP...');
                     const content = await zip.generateAsync({type:"blob"});
-                    saveAs(content, "Carrefour_Final_ANSI.zip");
+                    saveAs(content, "Ofertas_Carrefour_Final.zip");
                     
-                    btn.disabled = false; btn.innerText = '🚀 GENERAR IMÁGENES WEBP';
+                    btn.disabled = false; btn.innerText = '🚀 PROCESAR IMÁGENES';
                     log('✅ ¡TERMINADO!');
                 }
             });
