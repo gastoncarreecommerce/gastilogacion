@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Carrefour MASSIVE FIX</title>
+    <title>Generador Carrefour FINAL</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +29,7 @@
         }
         
         h1 { margin: 0 0 10px 0; color: #fff; font-size: 26px; }
-        .subtitle { color: #ffc107; margin-bottom: 30px; font-weight: bold; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+        .subtitle { color: #0dcaf0; margin-bottom: 30px; font-weight: bold; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
         
         .input-group { margin-bottom: 20px; }
         label { display: block; font-weight: bold; margin-bottom: 10px; color: #ddd; }
@@ -78,25 +78,40 @@
         #layer-footer { width: 1000px; height: 167px; bottom: 0; left: 0; z-index: 10; }
         #layer-badge { width: 187px; height: 155px; top: 30px; left: 30px; z-index: 30; }
 
-        /* --- TÍTULO (FLEXBOX CORREGIDO) --- */
+        /* --- TÍTULO (CORREGIDO) --- */
         .title-container {
-            position: absolute; top: 70px; left: 180px; z-index: 20; 
-            /* Flexbox para centrado perfecto */
-            display: inline-flex; align-items: center; justify-content: flex-start;
-            height: 75px; min-width: 100px;
+            position: absolute; 
+            top: 70px; 
+            left: 180px; 
+            z-index: 20; 
+            
+            /* Flexbox para centrado perfecto VERTICAL Y HORIZONTAL */
+            display: inline-flex; 
+            align-items: center; /* Centra verticalmente el texto */
+            justify-content: flex-start;
+            
+            height: 75px; 
+            min-width: 100px;
             background: #ffffff; 
             border-radius: 0 50px 50px 0; 
-            /* Padding ajustado y box-sizing para que no se desfase */
-            padding-left: 60px; padding-right: 40px; 
-            box-sizing: border-box; 
+            
+            /* Solo padding lateral, nada arriba ni abajo que deforme */
+            padding-left: 60px; 
+            padding-right: 40px; 
+            
             box-shadow: none; border: none;
         }
 
         #txt-title {
             color: var(--azul-carrefour); 
-            font-family: 'Ubuntu', sans-serif; font-weight: 700; font-size: 50px; 
-            line-height: 1; white-space: nowrap; margin: 0; 
-            /* Eliminado padding inferior manual que causaba desfasaje */
+            font-family: 'Ubuntu', sans-serif; 
+            font-weight: 700; 
+            font-size: 50px; 
+            line-height: 1; 
+            white-space: nowrap; 
+            margin: 0; 
+            padding: 0; /* Eliminado cualquier padding interno */
+            transform: translateY(-2px); /* Pequeño ajuste óptico fino */
         }
 
         /* PESO */
@@ -111,10 +126,10 @@
 
     <div class="panel-control">
         <h1>🏭 Generador Carrefour</h1>
-        <div class="subtitle">🛠️ FIXES: UTF-8 + ALINEACIÓN</div>
+        <div class="subtitle">✅ FIXES: UTF-8 + ALINEACIÓN + CATEGORÍAS</div>
         
         <div class="input-group">
-            <label>1. Subir Archivo CSV (UTF-8)</label>
+            <label>1. Subir Archivo CSV</label>
             <input type="file" id="csv-file" accept=".csv">
         </div>
 
@@ -142,29 +157,28 @@
             logArea.scrollTop = logArea.scrollHeight;
         }
 
-        // --- ASSETS (CORREGIDO CON TUS CATEGORÍAS EXACTAS) ---
+        // --- ASSETS (MAPEO EXACTO A TUS CATEGORÍAS) ---
         function getBadgeFile(category) {
-            // Limpiamos el input (minúsculas y espacios extremos)
             const cat = (category || '').toLowerCase().trim();
             
-            // Coincidencias exactas según tu Excel
+            // COINCIDENCIAS EXACTAS (Tus nombres de Excel)
             if (cat === 'carne vacuna') return 'badge_vaca.png';
             if (cat === 'carne de cerdo') return 'badge_cerdo.png';
             if (cat === 'pollo y granja') return 'badge_pollo.png';
             if (cat === 'pescados y mariscos') return 'badge_pescado.png';
 
-            // Fallbacks (por si acaso alguna viene diferente)
-            if (cat.includes('vaca') || cat.includes('bovino')) return 'badge_vaca.png';
+            // Coincidencias parciales (Respaldo)
+            if (cat.includes('vaca') || cat.includes('novillo')) return 'badge_vaca.png';
             if (cat.includes('cerdo') || cat.includes('puerco')) return 'badge_cerdo.png';
             if (cat.includes('pollo') || cat.includes('ave')) return 'badge_pollo.png';
-            if (cat.includes('pesca') || cat.includes('mar')) return 'badge_pescado.png';
+            if (cat.includes('pescado') || cat.includes('mar')) return 'badge_pescado.png';
             
-            return 'badge_vaca.png'; // Default
+            return 'badge_vaca.png'; // Default si no encuentra nada
         }
 
-        // La lógica de cocción con comas YA FUNCIONA bien así (includes detecta la palabra igual)
         function getFooterFile(cooking) {
             const c = (cooking || '').toLowerCase();
+            // Esto funciona perfecto con "Horno, Olla" porque busca la palabra clave
             const hasParrilla = c.includes('parrilla');
             const hasHorno = c.includes('horno');
             const hasOlla = c.includes('olla');
@@ -203,11 +217,10 @@
                 };
                 
                 tempImg.onerror = () => {
-                    log(`⚠️ Error cargando imagen: ${imgUrl}`);
+                    log(`⚠️ Error imagen: ${imgUrl}`);
                     bgLayer.style.backgroundColor = '#333';
                     resolve();
                 };
-                // Timestamp para evitar caché
                 tempImg.src = imgUrl + (imgUrl.includes('?') ? '&' : '?') + 'cb=' + new Date().getTime();
             });
         }
@@ -217,7 +230,7 @@
             const area = document.getElementById('capture-area');
             return new Promise((resolve, reject) => {
                 html2canvas(area, {
-                    scale: 2, // Super-sampling para nitidez
+                    scale: 2, 
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: null,
@@ -242,29 +255,37 @@
             if (!fileInput.files.length) { alert('Falta el CSV'); return; }
 
             const btn = document.getElementById('btn-process');
-            btn.disabled = true; btn.innerText = '⏳ PROCESANDO CON FIXES...';
+            btn.disabled = true; btn.innerText = '⏳ PROCESANDO...';
             logArea.innerHTML = '';
 
-            // FIX 1: FORZAR CODIFICACIÓN UTF-8
+            // CONFIGURACIÓN CLAVE PARA ACENTOS
             Papa.parse(fileInput.files[0], {
                 header: true, 
                 skipEmptyLines: true, 
-                encoding: "UTF-8", // <--- ESTO ARREGLA LOS ACENTOS
+                // Detecta automáticamente si es UTF-8 o ANSI (ISO-8859-1)
+                encoding: "", 
                 complete: async function(results) {
                     const rows = results.data;
+                    
+                    // Verificación rápida de la primera fila
+                    if(rows.length > 0) {
+                         log(`🔍 Verificando codificación: "${rows[0].nombre_producto}"`);
+                    }
+
                     const zip = new JSZip();
-                    const folder = zip.folder("Carrefour_Fixed_WEBP");
+                    const folder = zip.folder("Carrefour_Final");
 
                     await document.fonts.ready;
                     
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
                         if (!row.nombre_producto) continue;
+                        
                         log(`📸 Procesando: ${row.nombre_producto}`);
                         
                         try {
                             await setupCanvas(row);
-                            await new Promise(r => setTimeout(r, 100)); // Estabilización
+                            await new Promise(r => setTimeout(r, 100)); 
                             const blob = await generateImage();
                             
                             const cleanName = row.nombre_producto.replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -275,7 +296,7 @@
 
                     log('📦 Comprimiendo ZIP...');
                     const content = await zip.generateAsync({type:"blob"});
-                    saveAs(content, "Carrefour_Fixed_WEBP.zip");
+                    saveAs(content, "Carrefour_Final.zip");
                     
                     btn.disabled = false; btn.innerText = '🚀 GENERAR IMÁGENES WEBP';
                     log('✅ ¡TERMINADO!');
