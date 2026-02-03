@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Carrefour FINAL MULTI-LÍNEA</title>
+    <title>Generador Carrefour FINAL LEGIBLE</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,7 @@
         #layer-footer { width: 1000px; height: 167px; bottom: 0; left: 0; z-index: 10; }
         #layer-badge { width: 187px; height: 155px; top: 30px; left: 30px; z-index: 30; }
 
-        /* TÍTULO MULTI-LÍNEA (CAMBIO CLAVE) */
+        /* TÍTULO OPTIMIZADO PARA 2 LÍNEAS */
         .title-pill {
             position: absolute; 
             top: 70px; 
@@ -50,36 +50,37 @@
             z-index: 20;
             
             display: inline-flex; 
-            align-items: center; /* Centra verticalmente si es 1 o 2 líneas */
+            align-items: center; /* Centra verticalmente */
             
-            min-height: 75px; /* Altura mínima para 1 línea */
-            max-height: 150px; /* Altura máxima permitida */
+            min-height: 80px;  /* Altura mínima (1 línea) */
+            max-height: 165px; /* Altura máxima (2 líneas cómodas) */
             
             background: #fff; 
             border-radius: 0 50px 50px 0;
             
+            /* Ancho restringido para forzar el salto de línea antes */
             padding-left: 60px; 
             padding-right: 50px;
-            padding-top: 10px;    /* Aire arriba */
-            padding-bottom: 10px; /* Aire abajo */
+            padding-top: 10px;
+            padding-bottom: 10px;
             
-            max-width: 780px; 
+            max-width: 720px; /* <--- CLAVE: Más angosto fuerza el salto de línea */
             box-sizing: border-box;
         }
 
         #txt-title {
             color: var(--azul-carrefour); 
             font-weight: 700; 
-            font-size: 50px; 
-            line-height: 1.1; /* Un poco más apretado para que entren bien 2 líneas */
+            font-size: 60px; /* <--- CLAVE: Empezamos MUY GRANDE */
+            line-height: 1.1; 
             
-            /* Permitimos salto de línea */
+            /* Permitir 2 líneas */
             white-space: normal; 
             word-wrap: break-word;
             
             margin: 0;
             
-            /* Limitamos visualmente a 2 líneas máximo por CSS */
+            /* Cortar visualmente si excede (el script lo arreglará antes) */
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -96,7 +97,7 @@
 <body>
 
     <div class="panel">
-        <h1>🛠️ Generador Carrefour: 2 Líneas + Fixes</h1>
+        <h1>🛠️ Generador Carrefour: Final Legible</h1>
         
         <div class="grid-2">
             <div>
@@ -139,7 +140,7 @@
             logArea.scrollTop = logArea.scrollHeight;
         }
 
-        // --- 1. LÓGICA DE DETECCIÓN INTELIGENTE DE ÍCONO ---
+        // --- 1. DETECCIÓN DE ÍCONOS ---
         function getBadgeFile(row) {
             const textToSearch = ((row.categoria || '') + ' ' + (row.nombre_producto || '')).toLowerCase();
 
@@ -173,7 +174,7 @@
             return 'badge_vaca.png';
         }
 
-        // --- 2. LÓGICA DE FOOTER ---
+        // --- 2. DETECCIÓN DE FOOTER ---
         function getFooterFile(cooking) {
             const c = (cooking || '').toLowerCase();
             const hasParrilla = c.includes('parrilla');
@@ -190,24 +191,24 @@
             return 'footer_full.png';
         }
 
-        // --- 3. AUTO-AJUSTE PARA 2 LÍNEAS (NUEVO) ---
+        // --- 3. AUTO-AJUSTE MEJORADO (FUERZA 2 LÍNEAS) ---
         function fitText() {
             const titleEl = document.getElementById('txt-title');
-            const pillEl = document.querySelector('.title-pill');
             
-            let fontSize = 50; // Tamaño inicial
+            // Empezamos GRANDE para forzar el salto de línea si el texto es medio/largo
+            let fontSize = 60; 
             titleEl.style.fontSize = fontSize + 'px';
             
-            // Lógica: Si la altura del texto supera los 130px (aprox 2 líneas llenas)
-            // entonces achicamos la letra.
-            // scrollHeight nos dice la altura real del contenido del texto.
-            while (titleEl.scrollHeight > 130 && fontSize > 30) {
+            // Lógica: Solo achicamos si el texto se sale de la altura permitida (aprox 160px para 2 líneas)
+            // Ya NO miramos el ancho, dejamos que el CSS rompa la línea.
+            // scrollHeight > 155 significa que ocupa 3 líneas o 2 líneas muy apretadas
+            while (titleEl.scrollHeight > 155 && fontSize > 30) {
                 fontSize -= 2;
                 titleEl.style.fontSize = fontSize + 'px';
             }
         }
 
-        // --- 4. NORMALIZADOR DE COLUMNAS ---
+        // --- 4. NORMALIZADOR ---
         function normalizeRowKeys(row) {
             const newRow = {};
             Object.keys(row).forEach(key => {
@@ -218,18 +219,19 @@
             return newRow;
         }
 
-        // --- 5. SETUP DEL LIENZO ---
+        // --- 5. SETUP ---
         function setupCanvas(rawRow) {
             return new Promise((resolve, reject) => {
                 const row = normalizeRowKeys(rawRow);
-                const unitValue = row.unidad || row.peso || row.contenido || row.cantidad || '';
+                
+                // Búsqueda inteligente de la unidad (kg/g)
+                const unitValue = row.unidad || row.peso || row.contenido || row.cantidad || row.unidades || '';
                 
                 // Texto y Peso
-                const titleEl = document.getElementById('txt-title');
-                titleEl.innerText = (row.nombre_producto || row.producto || 'SIN NOMBRE').trim();
+                document.getElementById('txt-title').innerText = (row.nombre_producto || row.producto || 'SIN NOMBRE').trim();
                 document.getElementById('txt-weight').innerText = unitValue.trim();
 
-                // Ejecutar ajuste (ahora basado en altura)
+                // Ejecutar ajuste de letra
                 fitText();
 
                 // Imágenes
@@ -250,7 +252,7 @@
                     resolve();
                 };
                 tempImg.onerror = () => {
-                    log(`⚠️ Falló imagen: ${imgUrl}`);
+                    log(`⚠️ Error imagen: ${imgUrl}`);
                     bgLayer.style.backgroundColor = '#444';
                     resolve();
                 };
@@ -279,7 +281,7 @@
             });
         }
 
-        // --- MOTOR PRINCIPAL ---
+        // --- MOTOR ---
         async function startBatch() {
             const fileInput = document.getElementById('csv-file');
             const encoding = document.getElementById('encoding-select').value;
@@ -296,19 +298,14 @@
                 encoding: encoding,
                 complete: async function(results) {
                     const rows = results.data;
-                    
-                    if(rows.length > 0) {
-                        const firstRow = normalizeRowKeys(rows[0]);
-                        log(`🔍 Prueba: "${firstRow.nombre_producto}"`);
-                    }
-
                     const zip = new JSZip();
-                    const folder = zip.folder("Carrefour_2Lineas_Fixed");
+                    const folder = zip.folder("Carrefour_Legible_Fixed");
 
                     await document.fonts.ready;
                     
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
+                        // Verificar que la fila no esté vacía
                         if (!Object.values(row).some(x => x)) continue;
 
                         try {
@@ -329,7 +326,7 @@
 
                     log('📦 Creando ZIP...');
                     const content = await zip.generateAsync({type:"blob"});
-                    saveAs(content, "Ofertas_Carrefour_2Lineas.zip");
+                    saveAs(content, "Ofertas_Carrefour_Legibles.zip");
                     
                     btn.disabled = false; btn.innerText = '🚀 PROCESAR IMÁGENES';
                     log('✅ ¡TERMINADO!');
