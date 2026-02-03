@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Generador PFT</title>
+  <title>Generador Carrefour FINAL EJE CENTRAL</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- Ubuntu (tuya) + Inter (UI pro) -->
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -16,10 +15,6 @@
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
   <style>
-    /* =========================================================
-       UI "VERCEL-ISH" + FILE PICKER PRO
-       (NO cambia funcionalidad, sólo estética)
-       ========================================================= */
     :root{
       --azul-carrefour:#0B3A8F;
 
@@ -31,15 +26,19 @@
 
       --text:#F5F7FF;
       --muted: rgba(245,247,255,.70);
-      --muted2: rgba(245,247,255,.55);
+      --muted2: rgba(245,247,255,.52);
 
-      --shadow: 0 20px 60px rgba(0,0,0,.55);
+      --shadow: 0 24px 70px rgba(0,0,0,.60);
       --shadow2: 0 12px 35px rgba(0,0,0,.35);
 
       --radius: 18px;
       --radius2: 14px;
 
       --focus: 0 0 0 4px rgba(255,255,255,.10), 0 0 0 6px rgba(11,58,143,.22);
+
+      --ok:#35D07F;
+      --warn:#F3C969;
+      --bad:#FF4D6D;
     }
 
     *{ box-sizing:border-box; }
@@ -47,24 +46,22 @@
 
     body{
       margin:0;
-      padding: 28px 18px 38px;
+      padding: 28px 18px 40px;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color: var(--text);
 
-      /* Fondo tipo Vercel */
       background:
-        radial-gradient(900px 520px at 18% -5%, rgba(0,255,200,.18), transparent 60%),
-        radial-gradient(820px 520px at 85% 5%, rgba(255,0,180,.14), transparent 60%),
-        radial-gradient(900px 560px at 50% 120%, rgba(120,90,255,.12), transparent 60%),
+        radial-gradient(900px 520px at 18% -5%, rgba(0,255,200,.16), transparent 60%),
+        radial-gradient(820px 520px at 85% 5%, rgba(255,0,180,.12), transparent 60%),
+        radial-gradient(900px 560px at 50% 120%, rgba(120,90,255,.10), transparent 60%),
         linear-gradient(180deg, #000, var(--bg));
 
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap: 18px;
+      gap: 16px;
     }
 
-    /* Grid blueprint sutil */
     body::before{
       content:"";
       position: fixed;
@@ -73,77 +70,140 @@
       background:
         linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0/ 48px 48px,
         linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px) 0 0/ 48px 48px;
-      opacity:.22;
+      opacity:.20;
       mask: radial-gradient(900px 650px at 25% 0%, #000 10%, transparent 65%);
     }
 
     .panel{
       width:100%;
-      max-width: 940px;
+      max-width: 980px;
       background: linear-gradient(180deg, var(--panel), var(--panel2));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 22px;
+      padding: 20px;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       position:relative;
       isolation:isolate;
     }
 
-    /* brillo sutil arriba */
     .panel::after{
       content:"";
       position:absolute;
       inset:0;
       pointer-events:none;
       border-radius: var(--radius);
-      background: radial-gradient(700px 220px at 20% 0%, rgba(255,255,255,.10), transparent 60%);
+      background: radial-gradient(700px 220px at 18% 0%, rgba(255,255,255,.10), transparent 60%);
       opacity:.65;
       z-index:-1;
     }
 
-    h1{
-      margin:0 0 18px 0;
+    /* Header limpio */
+    .header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 14px;
       padding-bottom: 14px;
-      font-family: 'Ubuntu', Inter, system-ui, sans-serif;
-      font-size: 28px;
-      letter-spacing:.2px;
+      margin-bottom: 14px;
       border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+
+    .brand{
       display:flex;
       align-items:center;
       gap: 12px;
-      flex-wrap: wrap;
+      min-width: 0;
     }
 
-    h1::after{
-      content:"";
-      display:block;
-      height:2px;
-      flex:1 1 240px;
-      margin-left: 14px;
-      background: linear-gradient(90deg, rgba(11,58,143,1), rgba(11,58,143,0));
+    .mark{
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      background:
+        radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,.8), rgba(255,255,255,0) 60%),
+        linear-gradient(135deg, rgba(11,58,143,1), rgba(13,86,214,1));
+      box-shadow: 0 18px 40px rgba(11,58,143,.35);
+      border: 1px solid rgba(255,255,255,.14);
+      flex:0 0 auto;
+    }
+
+    h1{
+      margin:0;
+      font-family: 'Ubuntu', Inter, system-ui, sans-serif;
+      font-size: 24px;
+      letter-spacing:.2px;
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .sub{
+      margin-top: 4px;
+      color: var(--muted2);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing:.2px;
+    }
+
+    .status{
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
       border-radius: 999px;
-      opacity:.8;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      user-select:none;
+    }
+    .dot{
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--warn);
+      box-shadow: 0 0 0 3px rgba(243,201,105,.12);
+    }
+
+    /* Layout */
+    .layout{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+    }
+    @media (max-width: 900px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: var(--shadow2);
     }
 
     .grid-2{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 16px;
+      gap: 12px;
     }
     @media (max-width: 760px){
       .grid-2{ grid-template-columns: 1fr; }
-      h1::after{ flex-basis: 100%; margin-left: 0; }
     }
 
     label{
       display:block;
       margin-bottom: 8px;
-      font-weight: 800;
-      font-size: 12px;
-      letter-spacing:.22px;
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing:.26px;
       text-transform: uppercase;
       color: var(--muted);
     }
@@ -154,41 +214,26 @@
       color: var(--muted2);
     }
 
-    /* Inputs */
     select, input{
       width:100%;
       padding: 12px 12px;
-      border-radius: var(--radius2);
+      border-radius: 14px;
       background: rgba(0,0,0,.38);
       color: var(--text);
       border: 1px solid rgba(255,255,255,.12);
       outline:none;
       transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
-      box-shadow: var(--shadow2);
     }
     select:focus, input:focus{
       border-color: rgba(11,58,143,.55);
       box-shadow: var(--focus);
     }
 
-    /* =========================================================
-       FILE PICKER PRO (100% custom, mantiene id="csv-file")
-       ========================================================= */
-    .file-pro{
-      position: relative;
-      width: 100%;
-    }
-
-    /* input real invisible (pero funcional) */
+    /* File picker PRO */
+    .file-pro{ position: relative; width: 100%; }
     .file-pro input[type="file"]{
-      position:absolute;
-      inset:0;
-      opacity:0;
-      cursor:pointer;
-      z-index: 3;
+      position:absolute; inset:0; opacity:0; cursor:pointer; z-index: 3;
     }
-
-    /* UI visible */
     .file-ui{
       display:flex;
       align-items:center;
@@ -197,16 +242,14 @@
       border-radius: 16px;
       background: rgba(0,0,0,.38);
       border: 1px solid rgba(255,255,255,.12);
-      box-shadow: var(--shadow2), inset 0 1px 0 rgba(255,255,255,.06);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
       user-select:none;
     }
-
     .file-ui:focus{
       outline:none;
       border-color: rgba(11,58,143,.55);
       box-shadow: var(--focus);
     }
-
     .file-btn{
       flex: 0 0 auto;
       padding: 10px 12px;
@@ -215,28 +258,23 @@
       letter-spacing: .35px;
       color: #fff;
       background:
-        radial-gradient(140px 60px at 20% 0%, rgba(255,255,255,.26), transparent 60%),
+        radial-gradient(140px 60px at 20% 0%, rgba(255,255,255,.24), transparent 60%),
         linear-gradient(135deg, rgba(11,58,143,1), rgba(13,86,214,1));
-      box-shadow: 0 18px 40px rgba(11,58,143,.35), inset 0 1px 0 rgba(255,255,255,.20);
+      box-shadow: 0 18px 40px rgba(11,58,143,.30), inset 0 1px 0 rgba(255,255,255,.20);
       border: 1px solid rgba(255,255,255,.14);
       transition: transform .12s ease, filter .12s ease;
     }
-
     .file-name{
-      color: rgba(245,247,255,.80);
+      color: rgba(245,247,255,.82);
       font-weight: 700;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
       min-width: 0;
     }
+    .file-pro:hover .file-btn{ transform: translateY(-1px); filter: brightness(1.05); }
 
-    .file-pro:hover .file-btn{
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-    }
-
-    /* Botón principal */
+    /* CTA */
     .btn-main{
       width:100%;
       padding: 14px 16px;
@@ -244,20 +282,17 @@
       border-radius: 16px;
       cursor:pointer;
       color:#fff;
-      font-weight: 900;
+      font-weight: 950;
       letter-spacing:.6px;
       text-transform: uppercase;
       background:
-        radial-gradient(140px 60px at 20% 0%, rgba(255,255,255,.26), transparent 60%),
+        radial-gradient(140px 60px at 20% 0%, rgba(255,255,255,.24), transparent 60%),
         linear-gradient(135deg, rgba(11,58,143,1), rgba(13,86,214,1));
-      box-shadow: 0 18px 40px rgba(11,58,143,.35), inset 0 1px 0 rgba(255,255,255,.20);
-      transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
-      margin-top: 6px;
+      box-shadow: 0 18px 40px rgba(11,58,143,.32), inset 0 1px 0 rgba(255,255,255,.20);
+      transition: transform .12s ease, filter .12s ease;
+      margin-top: 12px;
     }
-    .btn-main:hover{
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-    }
+    .btn-main:hover{ transform: translateY(-1px); filter: brightness(1.05); }
     .btn-main:disabled{
       background: rgba(255,255,255,.10);
       border-color: rgba(255,255,255,.10);
@@ -266,23 +301,76 @@
       cursor:not-allowed;
     }
 
-    /* Título log (tu inline style se mantiene, pero lo mejoro también) */
-    .log-title{
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing:.22px;
-      font-weight: 900;
+    /* Progress */
+    .progress-wrap{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
     }
 
-    /* Consola */
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 760px){
+      .kpis{ grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .kpi{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .kpi .t{
+      font-size: 11px;
+      color: var(--muted2);
+      font-weight: 800;
+      letter-spacing:.22px;
+      text-transform: uppercase;
+    }
+    .kpi .v{
+      margin-top: 6px;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing:.2px;
+    }
+
+    .bar{
+      width:100%;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      overflow:hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, rgba(53,208,127,1), rgba(243,201,105,1), rgba(13,86,214,1));
+      transition: width .18s ease;
+    }
+
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      color: var(--muted2);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* Console */
     .console{
       background: rgba(0,0,0,.55);
       border: 1px solid rgba(255,255,255,.12);
       border-radius: 16px;
       padding: 14px;
-      height: 240px;
+      height: 300px;
       overflow-y:auto;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
       font-size: 12px;
@@ -290,7 +378,6 @@
       color: #35D07F;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
     }
-
     .console::-webkit-scrollbar{ width: 10px; }
     .console::-webkit-scrollbar-thumb{
       background: rgba(255,255,255,.16);
@@ -298,8 +385,36 @@
       border: 2px solid rgba(0,0,0,.35);
     }
 
+    .console-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .console-head .title{
+      font-size: 11px;
+      letter-spacing:.26px;
+      text-transform: uppercase;
+      font-weight: 950;
+      color: var(--muted);
+    }
+    .mini-btn{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(245,247,255,.86);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 850;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .mini-btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+
     /* =========================================================
-       FÁBRICA FANTASMA (INTACTA)
+       FÁBRICA FANTASMA (1000x1000) - INTACTA
        ========================================================= */
     #shadow-factory { position: fixed; top: 0; left: -10000px; width: 1000px; height: 1000px; background: #fff; z-index: -9999; }
     .canvas-container { position: relative; width: 1000px; height: 1000px; overflow: hidden; image-rendering: high-quality; }
@@ -308,23 +423,8 @@
     .layer-png-abs { position: absolute; pointer-events: none; }
     #layer-footer { width: 1000px; height: 167px; bottom: 0; left: 0; z-index: 10; }
 
-    .header-wrapper {
-      position: absolute;
-      top: 30px;
-      left: 30px;
-      width: 900px;
-      height: 155px;
-      z-index: 30;
-    }
-
-    #layer-badge-flex {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 187px;
-      height: 155px;
-      z-index: 20;
-    }
+    .header-wrapper { position: absolute; top: 30px; left: 30px; width: 900px; height: 155px; z-index: 30; }
+    #layer-badge-flex { position: absolute; left: 0; top: 0; width: 187px; height: 155px; z-index: 20; }
 
     .title-pill-centered {
       position: absolute;
@@ -384,38 +484,96 @@
 <body>
 
   <div class="panel">
-    <h1>🛠️ Generador Carrefour: EJE CENTRAL</h1>
-
-    <div class="grid-2">
-      <div>
-        <label>1. Archivo CSV</label>
-
-        <!-- FILE PICKER PRO -->
-        <div class="file-pro">
-          <input type="file" id="csv-file" accept=".csv">
-          <div class="file-ui" role="button" tabindex="0" aria-label="Seleccionar archivo CSV">
-            <span class="file-btn">Seleccionar CSV</span>
-            <span class="file-name" id="csv-file-name">Ningún archivo seleccionado</span>
-          </div>
+    <div class="header">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div style="min-width:0;">
+          <h1>Generador PFT Automatizados - eCommerce Carrefour</h1>
+          <div class="sub">CSV → composición → captura 1000×1000 → ZIP (.webp)</div>
         </div>
-
-        <div class="helper">Tip: exportalo como CSV con encabezados (header) y sin filas vacías.</div>
       </div>
 
-      <div>
-        <label>2. Codificación</label>
-        <select id="encoding-select">
-          <option value="ISO-8859-1" selected>Excel Español (Windows-1252)</option>
-          <option value="UTF-8">UTF-8 (Moderno)</option>
-        </select>
-        <div class="helper">Si ves caracteres raros (acentos), probá alternar esta opción.</div>
+      <div class="status" id="ui-status">
+        <span class="dot" id="ui-dot"></span>
+        <span id="ui-status-text">Listo</span>
       </div>
     </div>
 
-    <button id="btn-process" class="btn-main" onclick="startBatch()">🚀 PROCESAR IMÁGENES</button>
+    <div class="layout">
 
-    <div class="log-title">LOG DEL SISTEMA:</div>
-    <div class="console" id="console-log">Esperando archivo...</div>
+      <!-- Izquierda: inputs + progreso -->
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <label>Archivo CSV</label>
+
+            <div class="file-pro">
+              <input type="file" id="csv-file" accept=".csv">
+              <div class="file-ui" role="button" tabindex="0" aria-label="Seleccionar archivo CSV">
+                <span class="file-btn">Seleccionar CSV</span>
+                <span class="file-name" id="csv-file-name">Ningún archivo seleccionado</span>
+              </div>
+            </div>
+
+            <div class="helper">Tip: encabezados claros (ej: nombre_producto, coccion, imagen_url).</div>
+          </div>
+
+          <div>
+            <label>Codificación</label>
+            <select id="encoding-select">
+              <option value="ISO-8859-1" selected>Excel Español (Windows-1252)</option>
+              <option value="UTF-8">UTF-8 (Moderno)</option>
+            </select>
+            <div class="helper">Si ves caracteres raros, alterná esta opción.</div>
+          </div>
+        </div>
+
+        <button id="btn-process" class="btn-main" onclick="startBatch()">🚀 PROCESAR IMÁGENES</button>
+
+        <div style="height:12px;"></div>
+
+        <!-- PROGRESO / KPI -->
+        <div class="progress-wrap">
+          <div class="kpis">
+            <div class="kpi">
+              <div class="t">Total</div>
+              <div class="v" id="kpi-total">0</div>
+            </div>
+            <div class="kpi">
+              <div class="t">Procesadas</div>
+              <div class="v" id="kpi-done">0</div>
+            </div>
+            <div class="kpi">
+              <div class="t">Fallidas</div>
+              <div class="v" id="kpi-fail">0</div>
+            </div>
+            <div class="kpi">
+              <div class="t">ETA</div>
+              <div class="v" id="kpi-eta">—</div>
+            </div>
+          </div>
+
+          <div class="bar" aria-label="Progreso">
+            <div id="progress-bar"></div>
+          </div>
+
+          <div class="meta">
+            <div><span id="meta-percent">0%</span> · <span id="meta-count">0/0</span></div>
+            <div>⏱ <span id="meta-elapsed">00:00</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Derecha: log -->
+      <div class="card">
+        <div class="console-head">
+          <div class="title">Log del sistema</div>
+          <button class="mini-btn" id="btn-clear-log" type="button">Limpiar</button>
+        </div>
+        <div class="console" id="console-log">Esperando archivo...</div>
+      </div>
+    </div>
   </div>
 
   <!-- FÁBRICA FANTASMA -->
@@ -436,14 +594,58 @@
   </div>
 
   <script>
+    // =========================
+    // Utilidades UI (solo visual)
+    // =========================
     const logArea = document.getElementById('console-log');
+
+    const uiDot = document.getElementById('ui-dot');
+    const uiStatusText = document.getElementById('ui-status-text');
+
+    const kpiTotal = document.getElementById('kpi-total');
+    const kpiDone  = document.getElementById('kpi-done');
+    const kpiFail  = document.getElementById('kpi-fail');
+    const kpiEta   = document.getElementById('kpi-eta');
+
+    const progressBar = document.getElementById('progress-bar');
+    const metaPercent = document.getElementById('meta-percent');
+    const metaCount   = document.getElementById('meta-count');
+    const metaElapsed = document.getElementById('meta-elapsed');
+
+    const btnClearLog = document.getElementById('btn-clear-log');
+
+    function setStatus(text, mode){
+      uiStatusText.textContent = text;
+
+      if(mode === 'working'){
+        uiDot.style.background = getComputedStyle(document.documentElement).getPropertyValue('--warn').trim() || '#F3C969';
+        uiDot.style.boxShadow = '0 0 0 3px rgba(243,201,105,.12)';
+      } else if(mode === 'done'){
+        uiDot.style.background = getComputedStyle(document.documentElement).getPropertyValue('--ok').trim() || '#35D07F';
+        uiDot.style.boxShadow = '0 0 0 3px rgba(53,208,127,.12)';
+      } else if(mode === 'error'){
+        uiDot.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bad').trim() || '#FF4D6D';
+        uiDot.style.boxShadow = '0 0 0 3px rgba(255,77,109,.12)';
+      } else {
+        uiDot.style.background = getComputedStyle(document.documentElement).getPropertyValue('--warn').trim() || '#F3C969';
+        uiDot.style.boxShadow = '0 0 0 3px rgba(243,201,105,.12)';
+      }
+    }
 
     function log(msg) {
       logArea.innerHTML += `> ${msg}<br>`;
       logArea.scrollTop = logArea.scrollHeight;
     }
 
-    // File picker PRO: muestra nombre (sin afectar funcionalidad)
+    function pad2(n){ return String(n).padStart(2,'0'); }
+    function fmtTime(sec){
+      sec = Math.max(0, Math.floor(sec));
+      const m = Math.floor(sec/60);
+      const s = sec % 60;
+      return `${pad2(m)}:${pad2(s)}`;
+    }
+
+    // File picker PRO
     const fileInput = document.getElementById('csv-file');
     const fileNameEl = document.getElementById('csv-file-name');
     const fileUi = document.querySelector('.file-ui');
@@ -451,10 +653,10 @@
     if (fileInput && fileNameEl) {
       fileInput.addEventListener('change', () => {
         fileNameEl.textContent = (fileInput.files && fileInput.files[0]) ? fileInput.files[0].name : 'Ningún archivo seleccionado';
+        setStatus(fileInput.files.length ? 'Archivo cargado' : 'Listo', 'ready');
       });
     }
 
-    // Accesibilidad: permitir click con Enter/Espacio en la UI
     if (fileUi && fileInput) {
       fileUi.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -463,6 +665,16 @@
         }
       });
     }
+
+    if(btnClearLog){
+      btnClearLog.addEventListener('click', () => {
+        logArea.innerHTML = '';
+      });
+    }
+
+    // =========================
+    // Tu lógica original intacta
+    // =========================
 
     // --- 1. DETECCIÓN DE ÍCONOS ---
     function getBadgeFile(row) {
@@ -588,7 +800,22 @@
       });
     }
 
-    // --- MOTOR ---
+    // =========================
+    // Motor + progreso/ETA
+    // =========================
+    let timerInterval = null;
+
+    function resetProgress(){
+      kpiTotal.textContent = '0';
+      kpiDone.textContent  = '0';
+      kpiFail.textContent  = '0';
+      kpiEta.textContent   = '—';
+      metaPercent.textContent = '0%';
+      metaCount.textContent = '0/0';
+      metaElapsed.textContent = '00:00';
+      progressBar.style.width = '0%';
+    }
+
     async function startBatch() {
       const fileInput = document.getElementById('csv-file');
       const encoding = document.getElementById('encoding-select').value;
@@ -596,42 +823,106 @@
       if (!fileInput.files.length) { alert('Falta el CSV'); return; }
 
       const btn = document.getElementById('btn-process');
-      btn.disabled = true; btn.innerText = '⏳ PROCESANDO...';
+      btn.disabled = true;
+      btn.innerText = '⏳ PROCESANDO...';
       logArea.innerHTML = '';
+      resetProgress();
+
+      setStatus('Procesando…', 'working');
+
+      const startMs = Date.now();
+      let done = 0;
+      let fail = 0;
+      let total = 0;
+
+      // Promedio móvil del tiempo por item para ETA
+      const samples = [];
+      const maxSamples = 12;
+
+      // Timer UI
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const elapsedSec = (Date.now() - startMs) / 1000;
+        metaElapsed.textContent = fmtTime(elapsedSec);
+      }, 250);
 
       Papa.parse(fileInput.files[0], {
         header: true,
         skipEmptyLines: true,
         encoding: encoding,
         complete: async function(results) {
-          const rows = results.data;
+          // filtramos filas vacías como vos hacías (pero sin romper nada)
+          const rows = results.data || [];
+          const validRows = rows.filter(r => r && Object.values(r).some(x => x));
+          total = validRows.length;
+
+          kpiTotal.textContent = String(total);
+          metaCount.textContent = `0/${total}`;
+
           const zip = new JSZip();
           const folder = zip.folder("Carrefour_Eje_Central");
 
           await document.fonts.ready;
 
-          for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
-            if (!Object.values(row).some(x => x)) continue;
+          for (let i = 0; i < validRows.length; i++) {
+            const row = validRows[i];
+            const itemStart = performance.now();
 
             try {
               const nRow = normalizeRowKeys(row);
-              const pName = nRow.nombre_producto || 'Producto_' + i;
+              const pName = nRow.nombre_producto || ('Producto_' + i);
+
               log(`📸 Generando: ${pName}`);
+
               await setupCanvas(row);
               await new Promise(r => setTimeout(r, 50));
               const blob = await generateImage();
+
               const cleanName = pName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
               folder.file(`${cleanName}.webp`, blob);
+
+              done++;
             } catch (error) {
+              fail++;
               log(`❌ Error: ${error.message}`);
             }
+
+            // Actualizar KPIs + progreso + ETA
+            kpiDone.textContent = String(done);
+            kpiFail.textContent = String(fail);
+
+            const processed = done + fail;
+            const percent = total ? Math.round((processed / total) * 100) : 0;
+            metaPercent.textContent = `${percent}%`;
+            metaCount.textContent = `${processed}/${total}`;
+            progressBar.style.width = `${percent}%`;
+
+            // sample time
+            const itemSec = (performance.now() - itemStart) / 1000;
+            samples.push(itemSec);
+            if (samples.length > maxSamples) samples.shift();
+
+            const avg = samples.reduce((a,b)=>a+b,0) / samples.length;
+            const remaining = Math.max(0, total - processed);
+            const etaSec = remaining * avg;
+
+            // Mostrar ETA solo cuando tenemos un poco de señal (>=3 items)
+            if (processed >= 3 && remaining > 0) kpiEta.textContent = fmtTime(etaSec);
+            if (remaining === 0) kpiEta.textContent = '00:00';
           }
 
+          // Termina
           const content = await zip.generateAsync({type:"blob"});
-          saveAs(content, "PFT_ImagenesConHeaders.zip");
-          btn.disabled = false; btn.innerText = '🚀 PROCESAR IMÁGENES';
+          saveAs(content, "PFT_Images.zip");
+
+          btn.disabled = false;
+          btn.innerText = '🚀 PROCESAR IMÁGENES';
+
+          clearInterval(timerInterval);
+          timerInterval = null;
+
           log('✅ ¡TERMINADO!');
+          setStatus(fail ? 'Terminado con alertas' : 'Terminado', fail ? 'error' : 'done');
         }
       });
     }
