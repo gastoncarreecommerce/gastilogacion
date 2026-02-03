@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Carrefour FINAL LEGIBLE</title>
+    <title>Generador Carrefour FINAL CENTRADO</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,58 +36,74 @@
         #shadow-factory { position: fixed; top: 0; left: -10000px; width: 1000px; height: 1000px; background: #fff; z-index: -9999; }
         .canvas-container { position: relative; width: 1000px; height: 1000px; overflow: hidden; image-rendering: high-quality; }
         
-        /* CAPAS */
+        /* CAPAS DE FONDO Y FOOTER */
         .bg-layer { position: absolute; top: 0; left: 0; width: 1000px; height: 1000px; background-size: cover; background-position: center; z-index: 1; }
-        .layer-png { position: absolute; pointer-events: none; }
+        .layer-png-abs { position: absolute; pointer-events: none; } /* Para elementos que siguen siendo absolutos */
         #layer-footer { width: 1000px; height: 167px; bottom: 0; left: 0; z-index: 10; }
-        #layer-badge { width: 187px; height: 155px; top: 30px; left: 30px; z-index: 30; }
 
-        /* TÍTULO OPTIMIZADO PARA 2 LÍNEAS */
-        .title-pill {
-            position: absolute; 
-            top: 70px; 
-            left: 180px; 
-            z-index: 20;
+        /* --- NUEVO SISTEMA DE ALINEACIÓN SUPERIOR (CRÍTICO) --- */
+        
+        /* 1. Contenedor Padre: Define el área superior y centra todo verticalmente */
+        .header-container {
+            position: absolute;
+            top: 30px; /* Posición original del top del badge */
+            left: 30px; /* Posición original del left del badge */
+            height: 155px; /* Altura exacta del ícono del animal */
+            display: flex; /* Activa Flexbox */
+            align-items: center; /* CENTRADO VERTICAL PERFECTO */
+            z-index: 30;
+            pointer-events: none; /* Para no bloquear interacciones si las hubiera */
+        }
+
+        /* 2. El Ícono del Animal (Ahora es hijo flex) */
+        #layer-badge-flex {
+            width: 187px;
+            height: 155px;
+            flex-shrink: 0; /* Evita que se deforme */
+            margin-right: -30px; /* Superposición con la pastilla blanca */
+            position: relative;
+            z-index: 2; /* Encima de la pastilla */
+        }
+
+        /* 3. La Pastilla del Título (Ahora es hijo flex) */
+        .title-pill-flex {
+            display: flex;
+            align-items: center;
             
-            display: inline-flex; 
-            align-items: center; /* Centra verticalmente */
+            /* Alturas flexibles, pero nunca más alto que el contenedor */
+            min-height: 80px;
+            max-height: 150px; 
             
-            min-height: 80px;  /* Altura mínima (1 línea) */
-            max-height: 165px; /* Altura máxima (2 líneas cómodas) */
-            
-            background: #fff; 
+            background: #fff;
             border-radius: 0 50px 50px 0;
             
-            /* Ancho restringido para forzar el salto de línea antes */
-            padding-left: 60px; 
+            /* Padding ajustado para la nueva estructura */
+            padding-left: 70px; 
             padding-right: 50px;
             padding-top: 10px;
             padding-bottom: 10px;
             
-            max-width: 720px; /* <--- CLAVE: Más angosto fuerza el salto de línea */
+            max-width: 700px;
             box-sizing: border-box;
+            position: relative;
+            z-index: 1; /* Debajo del badge */
         }
 
         #txt-title {
-            color: var(--azul-carrefour); 
-            font-weight: 700; 
-            font-size: 60px; /* <--- CLAVE: Empezamos MUY GRANDE */
-            line-height: 1.1; 
-            
-            /* Permitir 2 líneas */
-            white-space: normal; 
+            color: var(--azul-carrefour);
+            font-weight: 700;
+            font-size: 60px; /* Letra grande inicial */
+            line-height: 1.1;
+            white-space: normal;
             word-wrap: break-word;
-            
             margin: 0;
-            
-            /* Cortar visualmente si excede (el script lo arreglará antes) */
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        /* PESO */
+        /* PESO (Sigue igual, abajo a la derecha) */
         #txt-weight {
             position: absolute; bottom: 50px; right: 0; width: 215px; text-align: center;
             color: #fff; font-weight: 700; font-size: 55px; line-height: 1; z-index: 40; white-space: nowrap;
@@ -97,7 +113,7 @@
 <body>
 
     <div class="panel">
-        <h1>🛠️ Generador Carrefour: Final Legible</h1>
+        <h1>🛠️ Generador Carrefour: Final Centrado</h1>
         
         <div class="grid-2">
             <div>
@@ -124,11 +140,16 @@
     <div id="shadow-factory">
         <div class="canvas-container" id="capture-area">
             <div id="bg-layer" class="bg-layer"></div>
-            <img id="layer-footer" class="layer-png" src="footer_full.png">
-            <img id="layer-badge" class="layer-png" src="badge_vaca.png">
-            <div class="title-pill">
-                <span id="txt-title">TITULO</span>
+            
+            <img id="layer-footer" class="layer-png-abs" src="footer_full.png">
+            
+            <div class="header-container">
+                <img id="layer-badge-flex" src="badge_vaca.png">
+                <div class="title-pill-flex">
+                    <span id="txt-title">TITULO</span>
+                </div>
             </div>
+            
             <div id="txt-weight">1 KG</div>
         </div>
     </div>
@@ -144,32 +165,9 @@
         function getBadgeFile(row) {
             const textToSearch = ((row.categoria || '') + ' ' + (row.nombre_producto || '')).toLowerCase();
 
-            if (textToSearch.includes('cerdo') || 
-                textToSearch.includes('puerco') || 
-                textToSearch.includes('jamon') || 
-                textToSearch.includes('jamón') || 
-                textToSearch.includes('fiambre') ||
-                textToSearch.includes('bondiola') ||
-                textToSearch.includes('panceta') ||
-                textToSearch.includes('pechito')) {
-                return 'badge_cerdo.png';
-            }
-
-            if (textToSearch.includes('pollo') || 
-                textToSearch.includes('ave') || 
-                textToSearch.includes('patitas') || 
-                textToSearch.includes('suprema') ||
-                textToSearch.includes('granja')) {
-                return 'badge_pollo.png';
-            }
-
-            if (textToSearch.includes('pescado') || 
-                textToSearch.includes('mar') || 
-                textToSearch.includes('filet') || 
-                textToSearch.includes('merluza') ||
-                textToSearch.includes('calamar')) {
-                return 'badge_pescado.png';
-            }
+            if (textToSearch.includes('cerdo') || textToSearch.includes('puerco') || textToSearch.includes('jamon') || textToSearch.includes('jamón') || textToSearch.includes('fiambre') || textToSearch.includes('bondiola') || textToSearch.includes('panceta') || textToSearch.includes('pechito')) return 'badge_cerdo.png';
+            if (textToSearch.includes('pollo') || textToSearch.includes('ave') || textToSearch.includes('patitas') || textToSearch.includes('suprema') || textToSearch.includes('granja')) return 'badge_pollo.png';
+            if (textToSearch.includes('pescado') || textToSearch.includes('mar') || textToSearch.includes('filet') || textToSearch.includes('merluza') || textToSearch.includes('calamar') || textToSearch.includes('langostino')) return 'badge_pescado.png';
 
             return 'badge_vaca.png';
         }
@@ -191,18 +189,14 @@
             return 'footer_full.png';
         }
 
-        // --- 3. AUTO-AJUSTE MEJORADO (FUERZA 2 LÍNEAS) ---
+        // --- 3. AUTO-AJUSTE DE TEXTO (Basado en altura) ---
         function fitText() {
             const titleEl = document.getElementById('txt-title');
-            
-            // Empezamos GRANDE para forzar el salto de línea si el texto es medio/largo
-            let fontSize = 60; 
+            let fontSize = 60; // Empezamos grande
             titleEl.style.fontSize = fontSize + 'px';
             
-            // Lógica: Solo achicamos si el texto se sale de la altura permitida (aprox 160px para 2 líneas)
-            // Ya NO miramos el ancho, dejamos que el CSS rompa la línea.
-            // scrollHeight > 155 significa que ocupa 3 líneas o 2 líneas muy apretadas
-            while (titleEl.scrollHeight > 155 && fontSize > 30) {
+            // Si la altura del texto supera los 145px (aprox 2 líneas muy llenas), achicamos
+            while (titleEl.scrollHeight > 145 && fontSize > 30) {
                 fontSize -= 2;
                 titleEl.style.fontSize = fontSize + 'px';
             }
@@ -212,8 +206,7 @@
         function normalizeRowKeys(row) {
             const newRow = {};
             Object.keys(row).forEach(key => {
-                const cleanKey = key.trim().toLowerCase()
-                    .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+                const cleanKey = key.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
                 newRow[cleanKey] = row[key];
             });
             return newRow;
@@ -224,18 +217,18 @@
             return new Promise((resolve, reject) => {
                 const row = normalizeRowKeys(rawRow);
                 
-                // Búsqueda inteligente de la unidad (kg/g)
-                const unitValue = row.unidad || row.peso || row.contenido || row.cantidad || row.unidades || '';
-                
                 // Texto y Peso
-                document.getElementById('txt-title').innerText = (row.nombre_producto || row.producto || 'SIN NOMBRE').trim();
+                const titleText = (row.nombre_producto || row.producto || 'SIN NOMBRE').trim();
+                document.getElementById('txt-title').innerText = titleText;
+                
+                const unitValue = row.unidad || row.peso || row.contenido || row.cantidad || row.unidades || '';
                 document.getElementById('txt-weight').innerText = unitValue.trim();
 
                 // Ejecutar ajuste de letra
                 fitText();
 
                 // Imágenes
-                document.getElementById('layer-badge').src = getBadgeFile(row);
+                document.getElementById('layer-badge-flex').src = getBadgeFile(row); // Notar el cambio de ID
                 document.getElementById('layer-footer').src = getFooterFile(row.coccion);
 
                 // Fondo
@@ -299,35 +292,29 @@
                 complete: async function(results) {
                     const rows = results.data;
                     const zip = new JSZip();
-                    const folder = zip.folder("Carrefour_Legible_Fixed");
+                    const folder = zip.folder("Carrefour_Final_Centrado");
 
                     await document.fonts.ready;
                     
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
-                        // Verificar que la fila no esté vacía
                         if (!Object.values(row).some(x => x)) continue;
 
                         try {
                             const nRow = normalizeRowKeys(row);
                             const pName = nRow.nombre_producto || 'Producto_' + i;
-                            
                             log(`📸 Generando: ${pName}`);
-                            
                             await setupCanvas(row);
                             await new Promise(r => setTimeout(r, 50)); 
                             const blob = await generateImage();
-                            
                             const cleanName = pName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                             folder.file(`${cleanName}.webp`, blob); 
-
                         } catch (error) { log(`❌ Error: ${error.message}`); }
                     }
 
                     log('📦 Creando ZIP...');
                     const content = await zip.generateAsync({type:"blob"});
-                    saveAs(content, "Ofertas_Carrefour_Legibles.zip");
-                    
+                    saveAs(content, "Ofertas_Carrefour_Centrado.zip");
                     btn.disabled = false; btn.innerText = '🚀 PROCESAR IMÁGENES';
                     log('✅ ¡TERMINADO!');
                 }
