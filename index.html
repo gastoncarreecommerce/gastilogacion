@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Carrefour FINAL V6</title>
+    <title>Generador Carrefour FINAL EJE CENTRAL</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,59 +41,69 @@
         .layer-png-abs { position: absolute; pointer-events: none; }
         #layer-footer { width: 1000px; height: 167px; bottom: 0; left: 0; z-index: 10; }
 
-        /* --- NUEVO SISTEMA DE ALINEACIÓN (FLEXBOX PURO) --- */
-        /* Contenedor Maestro: Mide exactamente lo que mide el ícono de alto (155px) */
-        .header-layout {
+        /* --- SISTEMA DE ALINEACIÓN EJE CENTRAL --- */
+        
+        /* Contenedor de Referencia: Mide y se ubica igual que el ícono */
+        .header-wrapper {
             position: absolute;
             top: 30px; 
-            left: 30px; 
-            height: 155px; /* Altura fija del badge */
-            display: flex;
-            align-items: center; /* ESTO CENTRA TODO VERTICALMENTE */
+            left: 30px;
+            width: 900px; /* Ancho disponible */
+            height: 155px; /* ALTURA EXACTA DEL BADGE */
             z-index: 30;
-            width: 900px; /* Espacio disponible */
+            /* border: 1px solid red; /* Descomentar para ver la caja de alineación */
         }
 
-        /* 1. Badge (Ícono) */
+        /* 1. Ícono (Pegado a la izquierda) */
         #layer-badge-flex {
+            position: absolute;
+            left: 0;
+            top: 0;
             width: 187px;
             height: 155px;
-            flex-shrink: 0;
             z-index: 20; /* Encima del texto */
-            margin-right: -40px; /* Superposición negativa para que el texto se meta abajo */
         }
 
-        /* 2. Pastilla de Texto */
-        .title-pill-flex {
+        /* 2. Pastilla de Texto (Centrada Matemáticamente) */
+        .title-pill-centered {
+            position: absolute;
+            left: 140px; /* Se mete debajo del ícono (187 - overlap) */
+            
+            /* LA MAGIA DEL CENTRADO: */
+            top: 50%; 
+            transform: translateY(-50%);
+            
+            z-index: 10; /* Debajo del ícono */
+            
             background: #fff;
             border-radius: 0 50px 50px 0;
-            padding-left: 60px; /* Espacio para no chocar con el ícono */
+            
+            /* Relleno interno */
+            padding-left: 60px; 
             padding-right: 50px;
+            padding-top: 10px;
+            padding-bottom: 10px;
             
-            /* Flexbox interno para centrar el texto si sobra altura */
+            /* Comportamiento visual */
+            min-height: 80px;
             display: flex;
-            align-items: center;
-            
-            min-height: 85px; /* Altura mínima visual */
-            max-height: 155px; /* No puede ser más alto que el ícono */
-            
+            align-items: center; /* Centra el texto dentro de la pastilla */
             box-sizing: border-box;
-            z-index: 10; /* Debajo del badge */
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.2); /* Sombrita suave opcional */
+            max-width: 750px;
         }
 
         #txt-title {
             color: var(--azul-carrefour);
             font-weight: 700;
-            font-size: 60px; /* Empezamos GRANDE */
-            line-height: 1; /* Apretado para multi-línea */
+            font-size: 60px;
+            line-height: 1.1; 
             margin: 0;
             
-            /* Configuración para romper líneas */
+            /* Configuración Multilínea */
             white-space: normal;
             word-wrap: break-word;
             display: -webkit-box;
-            -webkit-line-clamp: 2; /* Máximo 2 líneas */
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -108,7 +118,7 @@
 <body>
 
     <div class="panel">
-        <h1>🛠️ Generador Carrefour: Centrado Matemático</h1>
+        <h1>🛠️ Generador Carrefour: EJE CENTRAL</h1>
         
         <div class="grid-2">
             <div>
@@ -135,9 +145,9 @@
             <div id="bg-layer" class="bg-layer"></div>
             <img id="layer-footer" class="layer-png-abs" src="footer_full.png">
             
-            <div class="header-layout">
+            <div class="header-wrapper">
                 <img id="layer-badge-flex" src="badge_vaca.png">
-                <div class="title-pill-flex">
+                <div class="title-pill-centered">
                     <span id="txt-title">TITULO DEL PRODUCTO</span>
                 </div>
             </div>
@@ -153,20 +163,13 @@
             logArea.scrollTop = logArea.scrollHeight;
         }
 
-        // --- 1. DETECCIÓN DE ÍCONOS (FIX JAMON) ---
+        // --- 1. DETECCIÓN DE ÍCONOS ---
         function getBadgeFile(row) {
-            // Buscamos en TODAS las columnas de texto por si acaso
             const fullText = JSON.stringify(row).toLowerCase();
 
-            if (fullText.includes('cerdo') || fullText.includes('jamon') || fullText.includes('jamón') || fullText.includes('fiambre') || fullText.includes('bondiola') || fullText.includes('panceta') || fullText.includes('pechito') || fullText.includes('matambrito')) {
-                return 'badge_cerdo.png';
-            }
-            if (fullText.includes('pollo') || fullText.includes('ave') || fullText.includes('patitas') || fullText.includes('suprema') || fullText.includes('granja')) {
-                return 'badge_pollo.png';
-            }
-            if (fullText.includes('pescado') || fullText.includes('mar') || fullText.includes('filet') || fullText.includes('merluza') || fullText.includes('calamar')) {
-                return 'badge_pescado.png';
-            }
+            if (fullText.includes('cerdo') || fullText.includes('puerco') || fullText.includes('jamon') || fullText.includes('jamón') || fullText.includes('fiambre') || fullText.includes('bondiola') || fullText.includes('panceta') || fullText.includes('pechito')) return 'badge_cerdo.png';
+            if (fullText.includes('pollo') || fullText.includes('ave') || fullText.includes('patitas') || fullText.includes('suprema') || fullText.includes('granja')) return 'badge_pollo.png';
+            if (fullText.includes('pescado') || fullText.includes('mar') || fullText.includes('filet') || fullText.includes('merluza') || fullText.includes('calamar')) return 'badge_pescado.png';
             return 'badge_vaca.png';
         }
 
@@ -187,37 +190,30 @@
             return 'footer_full.png';
         }
 
-        // --- 3. AUTO-AJUSTE PARA QUE ENTRE Y NO SE CORTE ---
+        // --- 3. AUTO-AJUSTE PARA QUE ENTRE ---
         function fitText() {
             const titleEl = document.getElementById('txt-title');
-            let fontSize = 60; // Arrancamos grande
+            let fontSize = 60; 
             titleEl.style.fontSize = fontSize + 'px';
             
-            // Si la altura del texto es mayor a 130px (aprox 2 líneas apretadas), achicar
-            while (titleEl.scrollHeight > 135 && fontSize > 25) {
+            // Si el texto tiene 2 líneas muy largas (altura > 135), achicar
+            while (titleEl.scrollHeight > 140 && fontSize > 25) {
                 fontSize -= 2;
                 titleEl.style.fontSize = fontSize + 'px';
             }
         }
 
-        // --- 4. BUSCADOR DE UNIDAD (FIX VACÍO) ---
+        // --- 4. BUSCADOR DE UNIDAD ---
         function findUnitValue(row) {
-            // 1. Busca columnas obvias
             if (row.unidad) return row.unidad;
             if (row.peso) return row.peso;
             if (row.contenido) return row.contenido;
-            
-            // 2. Busca cualquier columna que tenga números + kg/g/ml
             const keys = Object.keys(row);
             for (let k of keys) {
                 const val = (row[k] || '').toString().trim();
-                // Regex: busca numero seguido de kg, g, un, ml, cc
-                if (/^\d+(\.|,)?\d*\s*(kg|g|gr|un|ml|cc|lts|l)$/i.test(val)) {
-                    log(`⚠️ Unidad encontrada en columna rara: "${k}"`);
-                    return val;
-                }
+                if (/^\d+(\.|,)?\d*\s*(kg|g|gr|un|ml|cc|lts|l)$/i.test(val)) return val;
             }
-            return ''; // Se rinde
+            return ''; 
         }
 
         // --- 5. NORMALIZADOR ---
@@ -235,15 +231,15 @@
             return new Promise((resolve, reject) => {
                 const row = normalizeRowKeys(rawRow);
                 
-                // Texto Principal
+                // Texto
                 const titleText = (row.nombre_producto || row.producto || row.titulo || 'SIN NOMBRE').trim();
                 document.getElementById('txt-title').innerText = titleText;
                 
-                // Unidad (Lógica inteligente)
+                // Unidad
                 const unitValue = findUnitValue(row);
                 document.getElementById('txt-weight').innerText = unitValue;
 
-                // Ajustar tamaño letra
+                // Ajustar
                 fitText();
 
                 // Imágenes
@@ -264,7 +260,6 @@
                     resolve();
                 };
                 tempImg.onerror = () => {
-                    log(`⚠️ Error imagen: ${imgUrl}`);
                     bgLayer.style.backgroundColor = '#444';
                     resolve();
                 };
@@ -311,7 +306,7 @@
                 complete: async function(results) {
                     const rows = results.data;
                     const zip = new JSZip();
-                    const folder = zip.folder("Carrefour_Centrado_Fixed");
+                    const folder = zip.folder("Carrefour_Eje_Central");
 
                     await document.fonts.ready;
                     
@@ -331,9 +326,8 @@
                         } catch (error) { log(`❌ Error: ${error.message}`); }
                     }
 
-                    log('📦 Creando ZIP...');
                     const content = await zip.generateAsync({type:"blob"});
-                    saveAs(content, "Ofertas_Carrefour_Final_V6.zip");
+                    saveAs(content, "Ofertas_Carrefour_Centrado.zip");
                     btn.disabled = false; btn.innerText = '🚀 PROCESAR IMÁGENES';
                     log('✅ ¡TERMINADO!');
                 }
