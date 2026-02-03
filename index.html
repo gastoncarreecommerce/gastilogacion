@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Generador Carrefour FINAL EJE CENTRAL</title>
+  <title>Generador PFT</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -629,7 +629,7 @@
           }
 
           const content = await zip.generateAsync({type:"blob"});
-          saveAs(content, "Ofertas_Carrefour_Centrado.zip");
+          saveAs(content, "PFT_ImagenesConHeaders.zip");
           btn.disabled = false; btn.innerText = '🚀 PROCESAR IMÁGENES';
           log('✅ ¡TERMINADO!');
         }
