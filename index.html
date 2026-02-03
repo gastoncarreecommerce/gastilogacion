@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Carrefour FINAL ROBUSTO</title>
+    <title>Generador Carrefour FINAL MULTI-LÍNEA</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,20 +42,48 @@
         #layer-footer { width: 1000px; height: 167px; bottom: 0; left: 0; z-index: 10; }
         #layer-badge { width: 187px; height: 155px; top: 30px; left: 30px; z-index: 30; }
 
-        /* TÍTULO AUTO-AJUSTABLE */
+        /* TÍTULO MULTI-LÍNEA (CAMBIO CLAVE) */
         .title-pill {
-            position: absolute; top: 70px; left: 180px; z-index: 20;
-            display: inline-flex; align-items: center;
-            height: 75px; 
+            position: absolute; 
+            top: 70px; 
+            left: 180px; 
+            z-index: 20;
+            
+            display: inline-flex; 
+            align-items: center; /* Centra verticalmente si es 1 o 2 líneas */
+            
+            min-height: 75px; /* Altura mínima para 1 línea */
+            max-height: 150px; /* Altura máxima permitida */
+            
             background: #fff; 
             border-radius: 0 50px 50px 0;
-            padding-left: 60px; padding-right: 50px;
-            max-width: 780px; /* Límite para no salirse del canvas */
+            
+            padding-left: 60px; 
+            padding-right: 50px;
+            padding-top: 10px;    /* Aire arriba */
+            padding-bottom: 10px; /* Aire abajo */
+            
+            max-width: 780px; 
             box-sizing: border-box;
         }
+
         #txt-title {
-            color: var(--azul-carrefour); font-weight: 700; font-size: 50px; line-height: 1; 
-            white-space: nowrap; margin: 0;
+            color: var(--azul-carrefour); 
+            font-weight: 700; 
+            font-size: 50px; 
+            line-height: 1.1; /* Un poco más apretado para que entren bien 2 líneas */
+            
+            /* Permitimos salto de línea */
+            white-space: normal; 
+            word-wrap: break-word;
+            
+            margin: 0;
+            
+            /* Limitamos visualmente a 2 líneas máximo por CSS */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         /* PESO */
@@ -68,7 +96,7 @@
 <body>
 
     <div class="panel">
-        <h1>🛠️ Generador Carrefour: Repair Station</h1>
+        <h1>🛠️ Generador Carrefour: 2 Líneas + Fixes</h1>
         
         <div class="grid-2">
             <div>
@@ -113,10 +141,8 @@
 
         // --- 1. LÓGICA DE DETECCIÓN INTELIGENTE DE ÍCONO ---
         function getBadgeFile(row) {
-            // Unimos categoría y nombre para buscar palabras clave
             const textToSearch = ((row.categoria || '') + ' ' + (row.nombre_producto || '')).toLowerCase();
 
-            // Prioridad CERDO (Arregla lo del Jamón)
             if (textToSearch.includes('cerdo') || 
                 textToSearch.includes('puerco') || 
                 textToSearch.includes('jamon') || 
@@ -128,7 +154,6 @@
                 return 'badge_cerdo.png';
             }
 
-            // POLLO
             if (textToSearch.includes('pollo') || 
                 textToSearch.includes('ave') || 
                 textToSearch.includes('patitas') || 
@@ -137,7 +162,6 @@
                 return 'badge_pollo.png';
             }
 
-            // PESCADO
             if (textToSearch.includes('pescado') || 
                 textToSearch.includes('mar') || 
                 textToSearch.includes('filet') || 
@@ -146,7 +170,6 @@
                 return 'badge_pescado.png';
             }
 
-            // DEFAULT: VACA (Cualquier otra carne roja)
             return 'badge_vaca.png';
         }
 
@@ -167,27 +190,27 @@
             return 'footer_full.png';
         }
 
-        // --- 3. AUTO-AJUSTE DE TEXTO (Para que no se corte) ---
+        // --- 3. AUTO-AJUSTE PARA 2 LÍNEAS (NUEVO) ---
         function fitText() {
             const titleEl = document.getElementById('txt-title');
-            const containerWidth = 750; // Espacio máximo disponible aprox
-            let fontSize = 50; // Tamaño inicial
+            const pillEl = document.querySelector('.title-pill');
             
-            // Reseteamos
+            let fontSize = 50; // Tamaño inicial
             titleEl.style.fontSize = fontSize + 'px';
             
-            // Reducimos mientras sea más ancho que el contenedor
-            while (titleEl.offsetWidth > containerWidth && fontSize > 20) {
+            // Lógica: Si la altura del texto supera los 130px (aprox 2 líneas llenas)
+            // entonces achicamos la letra.
+            // scrollHeight nos dice la altura real del contenido del texto.
+            while (titleEl.scrollHeight > 130 && fontSize > 30) {
                 fontSize -= 2;
                 titleEl.style.fontSize = fontSize + 'px';
             }
         }
 
-        // --- 4. NORMALIZADOR DE COLUMNAS (Para que encuentre "Unidad") ---
+        // --- 4. NORMALIZADOR DE COLUMNAS ---
         function normalizeRowKeys(row) {
             const newRow = {};
             Object.keys(row).forEach(key => {
-                // Quitamos espacios, pasamos a minúsculas y quitamos acentos del header
                 const cleanKey = key.trim().toLowerCase()
                     .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
                 newRow[cleanKey] = row[key];
@@ -198,27 +221,19 @@
         // --- 5. SETUP DEL LIENZO ---
         function setupCanvas(rawRow) {
             return new Promise((resolve, reject) => {
-                // Normalizamos las columnas (Unidad -> unidad, Peso -> unidad)
                 const row = normalizeRowKeys(rawRow);
-
-                // Mapeo flexible de la columna peso/unidad
-                // Busca 'unidad', 'peso', 'contenido', 'cantidad'
                 const unitValue = row.unidad || row.peso || row.contenido || row.cantidad || '';
                 
-                if (!unitValue) {
-                    console.warn("Fila sin unidad detectada:", row);
-                }
-
-                // Asignar textos
+                // Texto y Peso
                 const titleEl = document.getElementById('txt-title');
                 titleEl.innerText = (row.nombre_producto || row.producto || 'SIN NOMBRE').trim();
                 document.getElementById('txt-weight').innerText = unitValue.trim();
 
-                // Ejecutar ajuste de tamaño de fuente
+                // Ejecutar ajuste (ahora basado en altura)
                 fitText();
 
-                // Asignar imágenes
-                document.getElementById('layer-badge').src = getBadgeFile(row); // Pasamos toda la fila
+                // Imágenes
+                document.getElementById('layer-badge').src = getBadgeFile(row);
                 document.getElementById('layer-footer').src = getFooterFile(row.coccion);
 
                 // Fondo
@@ -278,34 +293,31 @@
             Papa.parse(fileInput.files[0], {
                 header: true,
                 skipEmptyLines: true,
-                encoding: encoding, // Usamos la selección del usuario
+                encoding: encoding,
                 complete: async function(results) {
                     const rows = results.data;
                     
                     if(rows.length > 0) {
                         const firstRow = normalizeRowKeys(rows[0]);
-                        log(`🔍 Prueba de lectura: "${firstRow.nombre_producto || '??'}"`);
-                        log(`🔍 Peso detectado: "${firstRow.unidad || firstRow.peso || 'VACÍO'}"`);
+                        log(`🔍 Prueba: "${firstRow.nombre_producto}"`);
                     }
 
                     const zip = new JSZip();
-                    const folder = zip.folder("Carrefour_Final_Fixed");
+                    const folder = zip.folder("Carrefour_2Lineas_Fixed");
 
                     await document.fonts.ready;
                     
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
-                        // Validar si la fila tiene datos reales
                         if (!Object.values(row).some(x => x)) continue;
 
                         try {
-                            // Normalizamos para obtener el nombre correcto para el log
                             const nRow = normalizeRowKeys(row);
                             const pName = nRow.nombre_producto || 'Producto_' + i;
                             
                             log(`📸 Generando: ${pName}`);
                             
-                            await setupCanvas(row); // Pasamos la fila cruda, setup normaliza dentro
+                            await setupCanvas(row);
                             await new Promise(r => setTimeout(r, 50)); 
                             const blob = await generateImage();
                             
@@ -317,7 +329,7 @@
 
                     log('📦 Creando ZIP...');
                     const content = await zip.generateAsync({type:"blob"});
-                    saveAs(content, "Ofertas_Carrefour_Final.zip");
+                    saveAs(content, "Ofertas_Carrefour_2Lineas.zip");
                     
                     btn.disabled = false; btn.innerText = '🚀 PROCESAR IMÁGENES';
                     log('✅ ¡TERMINADO!');
