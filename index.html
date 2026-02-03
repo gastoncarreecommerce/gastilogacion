@@ -4,90 +4,422 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador Carrefour FINAL EJE CENTRAL</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap" rel="stylesheet">
-    
+
+    <!-- Tipografías: Ubuntu (la tuya) + Inter para UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
-        /* --- ESTILOS VISUALES --- */
-        :root { --azul-carrefour: #0B3A8F; }
-        body { font-family: 'Ubuntu', sans-serif; background: #222; margin: 0; padding: 20px; color: white; display: flex; flex-direction: column; align-items: center; }
-        
-        .panel { background: #333; padding: 30px; border-radius: 12px; width: 100%; max-width: 800px; border: 1px solid #444; margin-bottom: 20px;}
-        h1 { margin-top: 0; border-bottom: 2px solid var(--azul-carrefour); padding-bottom: 10px; }
-        
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #ccc; }
-        select, input { width: 100%; padding: 10px; background: #111; border: 1px solid #555; color: white; border-radius: 5px; }
-        
-        .console { background: #000; color: #0f0; font-family: monospace; padding: 15px; height: 200px; overflow-y: auto; border-radius: 5px; font-size: 12px; border: 1px solid #555; }
-        
-        .btn-main { background: var(--azul-carrefour); color: white; width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin-top: 10px;}
-        .btn-main:hover { background: #154bb5; }
-        .btn-main:disabled { background: #555; cursor: not-allowed; }
+        /* =========================================================
+           UI PRO (NO cambia funcionalidad, solo look & feel)
+           ========================================================= */
 
-        /* --- FÁBRICA FANTASMA (1000x1000) --- */
+        :root{
+            --azul-carrefour:#0B3A8F;
+
+            --bg0:#070A12;
+            --bg1:#0B1020;
+            --card:#0E1630;
+            --card2:#0C1328;
+
+            --text:#EAF0FF;
+            --muted:#9AA6C0;
+            --muted2:#7C88A6;
+
+            --border:rgba(255,255,255,.10);
+            --border2:rgba(255,255,255,.14);
+
+            --shadow: 0 18px 55px rgba(0,0,0,.55);
+            --shadow2: 0 12px 35px rgba(0,0,0,.35);
+
+            --radius: 16px;
+            --radius2: 12px;
+
+            --ok:#35D07F;
+            --warn:#F3C969;
+            --bad:#FF4D6D;
+
+            --focus: 0 0 0 4px rgba(11,58,143,.22);
+        }
+
+        *{ box-sizing:border-box; }
+        html,body{ height:100%; }
+
+        body{
+            margin:0;
+            padding: 28px 18px 36px;
+            color:var(--text);
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
+
+            background:
+              radial-gradient(900px 500px at 10% 0%, rgba(11,58,143,.35), transparent 60%),
+              radial-gradient(700px 420px at 100% 10%, rgba(53,208,127,.18), transparent 60%),
+              radial-gradient(900px 550px at 50% 120%, rgba(120,90,255,.12), transparent 60%),
+              linear-gradient(180deg, var(--bg0), var(--bg1));
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap: 18px;
+        }
+
+        /* Decoración sutil */
+        body:before{
+            content:"";
+            position:fixed;
+            inset:-2px;
+            pointer-events:none;
+            background:
+              linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0 / 24px 24px,
+              linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 24px 24px;
+            mask: radial-gradient(900px 700px at 20% 0%, #000 10%, transparent 60%);
+            opacity:.55;
+        }
+
+        /* Contenedor */
+        .panel{
+            width:100%;
+            max-width: 920px;
+            background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) + 4px);
+            box-shadow: var(--shadow);
+            overflow:hidden;
+            position:relative;
+            isolation:isolate;
+        }
+
+        .panel:after{
+            content:"";
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            background:
+              radial-gradient(700px 300px at 20% 0%, rgba(11,58,143,.35), transparent 60%),
+              radial-gradient(600px 240px at 90% 10%, rgba(53,208,127,.12), transparent 60%);
+            opacity:.65;
+            z-index:-1;
+        }
+
+        /* Header pro */
+        .panel h1{
+            margin:0;
+            padding: 18px 20px;
+            font-family: Ubuntu, Inter, system-ui, sans-serif;
+            letter-spacing:.2px;
+            font-size: 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 12px;
+
+            background: linear-gradient(180deg, rgba(11,58,143,.18), rgba(255,255,255,0));
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel h1 .left{
+            display:flex;
+            align-items:center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .app-badge{
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background:
+              radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 60%),
+              linear-gradient(135deg, rgba(11,58,143,1), rgba(11,58,143,.55));
+            box-shadow: 0 10px 25px rgba(11,58,143,.28);
+            border: 1px solid rgba(255,255,255,.16);
+            flex:0 0 auto;
+        }
+
+        .title-wrap{
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+            min-width:0;
+        }
+
+        .title-main{
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            line-height:1.15;
+        }
+
+        .title-sub{
+            font-family: Inter, system-ui, sans-serif;
+            font-weight:500;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing:.2px;
+        }
+
+        .status-pill{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,.25);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            flex: 0 0 auto;
+            user-select:none;
+        }
+
+        .dot{
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--warn);
+            box-shadow: 0 0 0 3px rgba(243,201,105,.14);
+        }
+
+        /* Cuerpo panel */
+        .panel .content{
+            padding: 18px 20px 20px;
+            display:flex;
+            flex-direction:column;
+            gap: 14px;
+        }
+
+        .grid-2{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 760px){
+            .grid-2{ grid-template-columns: 1fr; }
+        }
+
+        /* Labels + helper */
+        label{
+            display:flex;
+            align-items:center;
+            gap: 8px;
+            margin: 0 0 8px;
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing:.25px;
+            text-transform: uppercase;
+        }
+
+        .field{
+            background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.12));
+            border: 1px solid var(--border);
+            border-radius: var(--radius2);
+            padding: 12px;
+            box-shadow: var(--shadow2);
+        }
+
+        .field:hover{
+            border-color: var(--border2);
+        }
+
+        /* Inputs PRO */
+        select, input{
+            width: 100%;
+            padding: 12px 12px;
+            background: rgba(4,8,18,.72);
+            border: 1px solid rgba(255,255,255,.12);
+            color: var(--text);
+            border-radius: 12px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+        }
+
+        select:focus, input:focus{
+            border-color: rgba(11,58,143,.55);
+            box-shadow: var(--focus);
+        }
+
+        /* File input: se ve mucho mejor */
+        input[type="file"]{
+            padding: 10px;
+        }
+        input[type="file"]::-webkit-file-upload-button{
+            background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+            border: 1px solid rgba(255,255,255,.14);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-right: 10px;
+            cursor:pointer;
+            font-weight: 700;
+        }
+        input[type="file"]::-webkit-file-upload-button:hover{
+            border-color: rgba(255,255,255,.22);
+            transform: translateY(-1px);
+        }
+
+        /* Botón principal PRO */
+        .btn-main{
+            width: 100%;
+            border: 0;
+            cursor:pointer;
+            user-select:none;
+
+            padding: 14px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+
+            color: #fff;
+            background:
+                radial-gradient(140px 50px at 20% 10%, rgba(255,255,255,.35), transparent 60%),
+                linear-gradient(135deg, rgba(11,58,143,1), rgba(13,86,214,1));
+            box-shadow:
+                0 14px 30px rgba(11,58,143,.35),
+                inset 0 1px 0 rgba(255,255,255,.20);
+
+            transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+        }
+
+        .btn-main:hover{
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+            box-shadow:
+                0 18px 40px rgba(11,58,143,.42),
+                inset 0 1px 0 rgba(255,255,255,.22);
+        }
+
+        .btn-main:active{
+            transform: translateY(0px) scale(.995);
+        }
+
+        .btn-main:disabled{
+            cursor:not-allowed;
+            background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+            box-shadow: none;
+            opacity: .65;
+        }
+
+        /* Sección log */
+        .log-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 10px;
+            margin-top: 2px;
+        }
+
+        .log-title{
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing:.25px;
+            text-transform: uppercase;
+        }
+
+        .log-hint{
+            font-size: 12px;
+            color: var(--muted2);
+        }
+
+        .console{
+            background: rgba(0,0,0,.55);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 14px;
+            padding: 14px;
+            height: 220px;
+            overflow-y:auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+            font-size: 12px;
+            line-height: 1.55;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+        }
+
+        .console::-webkit-scrollbar{ width: 10px; }
+        .console::-webkit-scrollbar-thumb{
+            background: rgba(255,255,255,.14);
+            border-radius: 999px;
+            border: 2px solid rgba(0,0,0,.35);
+        }
+
+        /* Footer UI */
+        .ui-footer{
+            width:100%;
+            max-width: 920px;
+            display:flex;
+            justify-content:space-between;
+            gap: 12px;
+            color: var(--muted2);
+            font-size: 12px;
+            opacity:.95;
+            padding: 0 6px;
+        }
+
+        .ui-footer code{
+            color: rgba(255,255,255,.82);
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.10);
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+            font-size: 12px;
+        }
+
+        /* =========================================================
+           (Tu fábrica fantasma intacta)
+           ========================================================= */
+
         #shadow-factory { position: fixed; top: 0; left: -10000px; width: 1000px; height: 1000px; background: #fff; z-index: -9999; }
         .canvas-container { position: relative; width: 1000px; height: 1000px; overflow: hidden; image-rendering: high-quality; }
-        
-        /* CAPAS DE FONDO Y FOOTER */
+
         .bg-layer { position: absolute; top: 0; left: 0; width: 1000px; height: 1000px; background-size: cover; background-position: center; z-index: 1; }
         .layer-png-abs { position: absolute; pointer-events: none; }
         #layer-footer { width: 1000px; height: 167px; bottom: 0; left: 0; z-index: 10; }
 
-        /* --- SISTEMA DE ALINEACIÓN EJE CENTRAL --- */
-        
-        /* Contenedor de Referencia: Mide y se ubica igual que el ícono */
         .header-wrapper {
             position: absolute;
-            top: 30px; 
+            top: 30px;
             left: 30px;
-            width: 900px; /* Ancho disponible */
-            height: 155px; /* ALTURA EXACTA DEL BADGE */
+            width: 900px;
+            height: 155px;
             z-index: 30;
-            /* border: 1px solid red; /* Descomentar para ver la caja de alineación */
         }
 
-        /* 1. Ícono (Pegado a la izquierda) */
         #layer-badge-flex {
             position: absolute;
             left: 0;
             top: 0;
             width: 187px;
             height: 155px;
-            z-index: 20; /* Encima del texto */
+            z-index: 20;
         }
 
-        /* 2. Pastilla de Texto (Centrada Matemáticamente) */
         .title-pill-centered {
             position: absolute;
-            left: 140px; /* Se mete debajo del ícono (187 - overlap) */
-            
-            /* LA MAGIA DEL CENTRADO: */
-            top: 50%; 
+            left: 140px;
+            top: 50%;
             transform: translateY(-50%);
-            
-            z-index: 10; /* Debajo del ícono */
-            
+            z-index: 10;
             background: #fff;
             border-radius: 0 50px 50px 0;
-            
-            /* Relleno interno */
-            padding-left: 60px; 
+            padding-left: 60px;
             padding-right: 50px;
             padding-top: 10px;
             padding-bottom: 10px;
-            
-            /* Comportamiento visual */
             min-height: 80px;
             display: flex;
-            align-items: center; /* Centra el texto dentro de la pastilla */
+            align-items: center;
             box-sizing: border-box;
             max-width: 750px;
         }
@@ -96,10 +428,8 @@
             color: var(--azul-carrefour);
             font-weight: 700;
             font-size: 60px;
-            line-height: 1.1; 
+            line-height: 1.1;
             margin: 0;
-            
-            /* Configuración Multilínea */
             white-space: normal;
             word-wrap: break-word;
             display: -webkit-box;
@@ -108,56 +438,112 @@
             overflow: hidden;
         }
 
-        /* PESO */
         #txt-weight {
             position: absolute; bottom: 50px; right: 0; width: 215px; text-align: center;
             color: #fff; font-weight: 700; font-size: 55px; line-height: 1; z-index: 40; white-space: nowrap;
         }
+
+        /* Accesibilidad mínima */
+        @media (prefers-reduced-motion: reduce){
+            *{ transition:none !important; scroll-behavior:auto !important; }
+        }
     </style>
 </head>
+
 <body>
 
     <div class="panel">
-        <h1>🛠️ Generador Carrefour: EJE CENTRAL</h1>
-        
-        <div class="grid-2">
-            <div>
-                <label>1. Archivo CSV</label>
-                <input type="file" id="csv-file" accept=".csv">
-            </div>
-            <div>
-                <label>2. Codificación</label>
-                <select id="encoding-select">
-                    <option value="ISO-8859-1" selected>Excel Español (Windows-1252)</option>
-                    <option value="UTF-8">UTF-8 (Moderno)</option>
-                </select>
-            </div>
-        </div>
+        <h1>
+            <span class="left">
+                <span class="app-badge" aria-hidden="true"></span>
+                <span class="title-wrap">
+                    <span class="title-main">🛠️ Generador Carrefour: EJE CENTRAL</span>
+                    <span class="title-sub">CSV → badges/footer → captura 1000×1000 → ZIP (.webp)</span>
+                </span>
+            </span>
 
-        <button id="btn-process" class="btn-main" onclick="startBatch()">🚀 PROCESAR IMÁGENES</button>
-        
-        <div style="margin-top: 10px; font-size: 0.9em; color: #aaa;">LOG DEL SISTEMA:</div>
-        <div class="console" id="console-log">Esperando archivo...</div>
+            <span class="status-pill" id="ui-status">
+                <span class="dot" id="ui-dot" aria-hidden="true"></span>
+                <span id="ui-status-text">Listo para procesar</span>
+            </span>
+        </h1>
+
+        <div class="content">
+
+            <div class="grid-2">
+                <div class="field">
+                    <label>1. Archivo CSV</label>
+                    <input type="file" id="csv-file" accept=".csv">
+                </div>
+
+                <div class="field">
+                    <label>2. Codificación</label>
+                    <select id="encoding-select">
+                        <option value="ISO-8859-1" selected>Excel Español (Windows-1252)</option>
+                        <option value="UTF-8">UTF-8 (Moderno)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="btn-process" class="btn-main" onclick="startBatch()">🚀 PROCESAR IMÁGENES</button>
+
+            <div class="log-header">
+                <div class="log-title">Log del sistema</div>
+                <div class="log-hint">Tip: si un fondo no carga por CORS, el sistema continúa igual.</div>
+            </div>
+
+            <div class="console" id="console-log">Esperando archivo...</div>
+        </div>
+    </div>
+
+    <div class="ui-footer">
+        <div>Atajos: <code>Ctrl</code> + <code>O</code> para elegir archivo (navegador)</div>
+        <div>Salida: <code>Ofertas_Carrefour_Centrado.zip</code></div>
     </div>
 
     <div id="shadow-factory">
         <div class="canvas-container" id="capture-area">
             <div id="bg-layer" class="bg-layer"></div>
             <img id="layer-footer" class="layer-png-abs" src="footer_full.png">
-            
+
             <div class="header-wrapper">
                 <img id="layer-badge-flex" src="badge_vaca.png">
                 <div class="title-pill-centered">
                     <span id="txt-title">TITULO DEL PRODUCTO</span>
                 </div>
             </div>
-            
+
             <div id="txt-weight">1 KG</div>
         </div>
     </div>
 
     <script>
         const logArea = document.getElementById('console-log');
+
+        // UI status (solo visual, no afecta funcionalidad)
+        const uiStatusText = document.getElementById('ui-status-text');
+        const uiDot = document.getElementById('ui-dot');
+
+        function setStatus(text, mode) {
+            if (!uiStatusText || !uiDot) return;
+            uiStatusText.textContent = text;
+
+            // modes: ready | working | done | error
+            if (mode === 'working') {
+                uiDot.style.background = '#F3C969';
+                uiDot.style.boxShadow = '0 0 0 3px rgba(243,201,105,.14)';
+            } else if (mode === 'done') {
+                uiDot.style.background = '#35D07F';
+                uiDot.style.boxShadow = '0 0 0 3px rgba(53,208,127,.14)';
+            } else if (mode === 'error') {
+                uiDot.style.background = '#FF4D6D';
+                uiDot.style.boxShadow = '0 0 0 3px rgba(255,77,109,.14)';
+            } else {
+                uiDot.style.background = '#F3C969';
+                uiDot.style.boxShadow = '0 0 0 3px rgba(243,201,105,.14)';
+            }
+        }
+
         function log(msg) {
             logArea.innerHTML += `> ${msg}<br>`;
             logArea.scrollTop = logArea.scrollHeight;
@@ -193,10 +579,9 @@
         // --- 3. AUTO-AJUSTE PARA QUE ENTRE ---
         function fitText() {
             const titleEl = document.getElementById('txt-title');
-            let fontSize = 60; 
+            let fontSize = 60;
             titleEl.style.fontSize = fontSize + 'px';
-            
-            // Si el texto tiene 2 líneas muy largas (altura > 135), achicar
+
             while (titleEl.scrollHeight > 140 && fontSize > 25) {
                 fontSize -= 2;
                 titleEl.style.fontSize = fontSize + 'px';
@@ -213,14 +598,14 @@
                 const val = (row[k] || '').toString().trim();
                 if (/^\d+(\.|,)?\d*\s*(kg|g|gr|un|ml|cc|lts|l)$/i.test(val)) return val;
             }
-            return ''; 
+            return '';
         }
 
         // --- 5. NORMALIZADOR ---
         function normalizeRowKeys(row) {
             const newRow = {};
             Object.keys(row).forEach(key => {
-                const cleanKey = key.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+                const cleanKey = key.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                 newRow[cleanKey] = row[key];
             });
             return newRow;
@@ -230,31 +615,26 @@
         function setupCanvas(rawRow) {
             return new Promise((resolve, reject) => {
                 const row = normalizeRowKeys(rawRow);
-                
-                // Texto
+
                 const titleText = (row.nombre_producto || row.producto || row.titulo || 'SIN NOMBRE').trim();
                 document.getElementById('txt-title').innerText = titleText;
-                
-                // Unidad
+
                 const unitValue = findUnitValue(row);
                 document.getElementById('txt-weight').innerText = unitValue;
 
-                // Ajustar
                 fitText();
 
-                // Imágenes
-                document.getElementById('layer-badge-flex').src = getBadgeFile(row); 
+                document.getElementById('layer-badge-flex').src = getBadgeFile(row);
                 document.getElementById('layer-footer').src = getFooterFile(row.coccion);
 
-                // Fondo
                 const imgUrl = row.imagen_url || row.imagen || row.foto || '';
                 const bgLayer = document.getElementById('bg-layer');
                 bgLayer.style.backgroundImage = 'none';
-                
+
                 if (!imgUrl) { resolve(); return; }
 
                 const tempImg = new Image();
-                tempImg.crossOrigin = "Anonymous"; 
+                tempImg.crossOrigin = "Anonymous";
                 tempImg.onload = () => {
                     bgLayer.style.backgroundImage = `url('${imgUrl}')`;
                     resolve();
@@ -272,7 +652,7 @@
             const area = document.getElementById('capture-area');
             return new Promise((resolve, reject) => {
                 html2canvas(area, {
-                    scale: 2, 
+                    scale: 2,
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: null,
@@ -292,12 +672,14 @@
         async function startBatch() {
             const fileInput = document.getElementById('csv-file');
             const encoding = document.getElementById('encoding-select').value;
-            
+
             if (!fileInput.files.length) { alert('Falta el CSV'); return; }
 
             const btn = document.getElementById('btn-process');
             btn.disabled = true; btn.innerText = '⏳ PROCESANDO...';
             logArea.innerHTML = '';
+
+            setStatus('Procesando lote...', 'working');
 
             Papa.parse(fileInput.files[0], {
                 header: true,
@@ -309,7 +691,7 @@
                     const folder = zip.folder("Carrefour_Eje_Central");
 
                     await document.fonts.ready;
-                    
+
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
                         if (!Object.values(row).some(x => x)) continue;
@@ -319,18 +701,34 @@
                             const pName = nRow.nombre_producto || 'Producto_' + i;
                             log(`📸 Generando: ${pName}`);
                             await setupCanvas(row);
-                            await new Promise(r => setTimeout(r, 50)); 
+                            await new Promise(r => setTimeout(r, 50));
                             const blob = await generateImage();
                             const cleanName = pName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                            folder.file(`${cleanName}.webp`, blob); 
-                        } catch (error) { log(`❌ Error: ${error.message}`); }
+                            folder.file(`${cleanName}.webp`, blob);
+                        } catch (error) {
+                            log(`❌ Error: ${error.message}`);
+                            setStatus('Se detectaron errores (ver log)', 'error');
+                        }
                     }
 
                     const content = await zip.generateAsync({type:"blob"});
                     saveAs(content, "Ofertas_Carrefour_Centrado.zip");
                     btn.disabled = false; btn.innerText = '🚀 PROCESAR IMÁGENES';
                     log('✅ ¡TERMINADO!');
+
+                    // Si no quedó en error, marcamos done
+                    if (uiStatusText && uiStatusText.textContent !== 'Se detectaron errores (ver log)') {
+                        setStatus('Terminado', 'done');
+                    }
                 }
+            });
+        }
+
+        // Detalle UX: cuando el usuario elige archivo, estado "listo"
+        const csvInput = document.getElementById('csv-file');
+        if (csvInput) {
+            csvInput.addEventListener('change', () => {
+                if (csvInput.files && csvInput.files.length) setStatus('Archivo cargado — listo', 'ready');
             });
         }
     </script>
