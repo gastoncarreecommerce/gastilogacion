@@ -501,7 +501,6 @@
 
     <div class="layout">
 
-      <!-- Izquierda: inputs + progreso -->
       <div class="card">
         <div class="grid-2">
           <div>
@@ -532,7 +531,6 @@
 
         <div style="height:12px;"></div>
 
-        <!-- PROGRESO / KPI -->
         <div class="progress-wrap">
           <div class="kpis">
             <div class="kpi">
@@ -565,7 +563,6 @@
 
       </div>
 
-      <!-- Derecha: log -->
       <div class="card">
         <div class="console-head">
           <div class="title">Log del sistema</div>
@@ -576,7 +573,6 @@
     </div>
   </div>
 
-  <!-- FÁBRICA FANTASMA -->
   <div id="shadow-factory">
     <div class="canvas-container" id="capture-area">
       <div id="bg-layer" class="bg-layer"></div>
@@ -872,13 +868,26 @@
               const nRow = normalizeRowKeys(row);
               const pName = nRow.nombre_producto || ('Producto_' + i);
 
-              log(`📸 Generando: ${pName}`);
+              // --- NUEVA LÓGICA: EXTRAER EAN DE LA URL ---
+              let cleanName = pName.replace(/[^a-z0-9]/gi, '_').toLowerCase(); // Fallback por defecto
+              const imgUrl = nRow.imagen_url || nRow.imagen || nRow.foto || '';
+              if (imgUrl) {
+                const parts = imgUrl.split('/');
+                const lastPart = parts[parts.length - 1].split('?')[0]; // Toma lo último después del / y quita parámetros si hay
+                if (lastPart.includes('.')) {
+                  cleanName = lastPart.substring(0, lastPart.lastIndexOf('.')); // Quita el .jpg / .png
+                } else if (lastPart) {
+                  cleanName = lastPart;
+                }
+              }
+              // -------------------------------------------
+
+              log(`📸 Generando: ${pName} (EAN: ${cleanName})`);
 
               await setupCanvas(row);
               await new Promise(r => setTimeout(r, 50));
               const blob = await generateImage();
 
-              const cleanName = pName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
               folder.file(`${cleanName}.webp`, blob);
 
               done++;
